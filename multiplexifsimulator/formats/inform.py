@@ -11,7 +11,7 @@ class FrameEmitterInForm(FrameEmitter):
         super(FrameEmitterInForm, self).__init__(shape=shape,cell_steps=cell_steps,boundary_steps=boundary_steps)
         return        
     def save_binary_seg_maps(self,path,processed_image=True):
-        with TiffWriter(path, bigtiff=True) as tif:
+        with TiffWriter(path) as tif:
             tif.save(self.cell_image.astype(np.uint16), 
                      compress=9, extratags=[(270,'s',1,_nuc_xml,True)])
             tif.save(self.edge_image.astype(np.uint16), 
