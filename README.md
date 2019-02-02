@@ -4,7 +4,7 @@ Simulate multiplex IF data
 
 ### Generate a binary_seg_map.tif based on a segmentation file
 
-```{python}
+```python
 import matplotlib.pyplot as plt
 from multiplexifsimulator.formats.inform import FrameEmitterInForm
 
