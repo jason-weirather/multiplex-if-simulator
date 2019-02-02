@@ -2,7 +2,7 @@
 
 Simulate multiplex IF data 
 
-### Generate a binary_seg_map.tif based on a segmentation file
+### Generate a binary_seg_map.tif based on a cell seg data file
 
 ```python
 import matplotlib.pyplot as plt
@@ -12,7 +12,9 @@ from multiplexifsimulator.formats.inform import FrameEmitterInForm
 fname = 'input/MEL3_120116_2_cell_seg_data.txt'
 seg = pd.read_csv(fname,sep="\t")
 
-# Create an image emiter of the proper size
+# Create an image emiter that will expand cells a maximum of 17 pixels
+#     in each direction and will expand the processed border a further
+#     20 pixels
 fe = FrameEmitterInForm(shape=(1040, 1392),cell_steps=17,boundary_steps=20)
 # Set the cell coordinates
 fe.set_cell_coordinates(seg[['Cell X Position',
