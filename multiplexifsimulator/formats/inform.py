@@ -7,12 +7,20 @@ _nuc_xml = '<?xml version="1.0" encoding="utf-16"?>\r\n<SegmentationImage>\r\n <
 _mem_xml = '<?xml version="1.0" encoding="utf-16"?>\r\n<SegmentationImage>\r\n <Version>1</Version>\r\n <CompartmentType>Membrane</CompartmentType>\r\n</SegmentationImage>'
 _pro_xml = '<?xml version="1.0" encoding="utf-16"?>\r\n<ProcessRegionImage>\r\n <Version>1</Version>\r\n</ProcessRegionImage>'
 class FrameEmitterInForm(FrameEmitter):
+    """
+    Generate mIF data similar in shape to InForm Exports.
+
+    Extends **FrameEmitter**
+    """
     def __init__(self,shape=(1040,1392),
                       cell_steps=17,
                       boundary_steps=10):
         super(FrameEmitterInForm, self).__init__(shape=shape,cell_steps=cell_steps,boundary_steps=boundary_steps)
         return        
     def save_binary_seg_maps(self,path,processed_image=True):
+        """
+        Save a binary_seg_map image based on the **.make_cell_image_()** images in a python-readable format
+        """
         with TiffWriter(path) as tif:
             tif.save(self.cell_image.astype(np.uint16), 
                      compress=9, extratags=[('ImageDescription','s',0,_nuc_xml,True)])
@@ -22,6 +30,9 @@ class FrameEmitterInForm(FrameEmitter):
                 tif.save(self.processed_image.astype(np.uint16), 
                          compress=9, extratags=[('ImageDescription','s',0,_pro_xml,True)])
     def save_binary_seg_maps_r(self,path,processed_image=True):
+        """
+        Save a binary_seg_map image based on the **.make_cell_image_()** images in an R-readable format
+        """
         with TiffWriter(path) as tif:
             tif.save(self.cell_image.astype(np.uint16), 
                      compress=9, description=_nuc_xml)
@@ -32,7 +43,10 @@ class FrameEmitterInForm(FrameEmitter):
                          compress=9, description=_pro_xml)
 
     def make_inform_frame(self,model_cells,base_path,sample_name,frame_name):
-        #cells = self.gradient_model1()
+        """
+        Save the inform 'cell_seg_data.txt', 'score_data.txt' and 'binary_seg_maps.tif' 
+        to  **basepath/sample_name/**
+        """
         self.set_cell_coordinates(cells)
         cell_seg = _construct_cell_seg(cells)
         score = _construct_score(cells)

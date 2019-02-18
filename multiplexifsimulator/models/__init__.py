@@ -3,6 +3,12 @@ from random import random
 class SlideModelGeneric(object):
     """
     A Generic class to spawn cell frames based on different models
+
+    General properties:
+        - **shape** (tuple) the integers (y,x) dimensions
+        - **cell_width** (int)
+        - **offset** (int) distnace to offset from side and every other row
+        - **cells** (int) the pandas.DataFrame with cell and phenotype information
     """
     def __init__(self,shape,cell_width=10):
         self.shape = shape
@@ -23,6 +29,10 @@ class SlideModelGeneric(object):
         return cells
 
     def expanded_cells(self):
+        """
+        Returns:
+            pandas.DataFrame with all phenotypes expanded in the phenotype_label
+        """
         ec = self.cells.copy()
         scored = [x for x in self.cells.columns if x not in ['id','x','y','phenotype_label']]
         #print(scored)
@@ -39,6 +49,9 @@ class SlideModelGeneric(object):
         fill_label='TUMOR',
         fill_probability=0.5,
         condition=lambda x: 1==1):
+        """
+        Updates the **cells** property with added cell phenotypes uniformally randomly distributed
+        """
         self.cells[column_name] = self.cells.apply(lambda x: 
                 fill_label if condition(x) and \
                      random() < fill_probability else x[column_name]
@@ -49,12 +62,12 @@ class SlideModelGeneric(object):
                         column_name = 'phenotype_label',
                         fill_label='TUMOR',
                         axis='x',
-                        breaks=[1/2,2/3],
+                        breaks=[1/2,3/4],
                         fill_probability=[1,0],
                         condition=lambda x: 1==1):
         """
         Set a tme with a loose margin between the breaks
-        # set_fraction is how frequently to apply the tumor label
+            set_fraction is how frequently to apply the tumor label
         """
         iwidth = self.shape[0] if axis == 'y' else self.shape[1]
         ## Do the left

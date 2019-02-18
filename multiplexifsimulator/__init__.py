@@ -3,14 +3,35 @@ import numpy as np
 import pandas as pd
 import sys, random
 class FrameEmitter(object):
+    """
+    Generic class for generating a mIF dataset
+
+    Common properties:
+        - **shape** (tuple) - the size of the image integers (y,x)
+        - **cell_steps** (int) - how many pixels to try to fill out in the process of defining a cell
+        - **boundary_steps** (int) - how many pixels farther than the image to fill out to define the active region
+
+    """
     def __init__(self,*args,**kwargs):
         self.shape = kwargs['shape']
         self.cell_steps = kwargs['cell_steps']
         self.boundary_steps = kwargs['boundary_steps']
         return
     def set_cell_coordinates(self,cell_df):
-        # cell_df: <x> <y> <id (optional)>
-        # if an id is given then that will be used.  otherwise we shuffle
+        """
+        Set the cell positions with a DataFrame.  *id* field is optional.  
+        If not set the is will be shuffled.
+
+        ===  ===  ===
+        id    x    y
+        ===  ===  ===
+        1    5    5
+        2    25   5
+        3    45   5
+        4    65   5
+        ===  ===  ===
+
+        """
         if cell_df['x'].max() >= self.shape[1]:
             sys.stderr.write("Warning: shape is larger than coordinates... trimming")
             cell_df = cell_df.loc[cell_df['x']<self.shape[1]]
@@ -26,6 +47,19 @@ class FrameEmitter(object):
         self.locations.index = [x+1 for x in self.locations.index]
         self.locations.index.name = 'id'
     def make_cell_image(self):
+        """
+        Requires the 'locations' be set by **\*.set_cell_coordinates(cell_df)**
+
+        Sets properties:
+            - cell_image (numpy.array)
+            - edge_image (numpy.array)
+            - processed_image (numpy.array)
+
+        Returns:
+            - cell_image
+            - edge_image
+            - processed_image
+        """
         # requires 'locations' property set
         nuc = np.zeros(self.shape).astype(np.uint32)
         for index,row in self.locations.iterrows():
