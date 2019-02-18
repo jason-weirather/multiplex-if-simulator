@@ -6,6 +6,14 @@
 Multiplex IF Simulator
 ==================================================
 
+Readme File
+===========
+
+.. mdinclude:: ../README.md
+
+Modules
+=======
+
 .. automodule:: multiplexifsimulator
    :members:
 

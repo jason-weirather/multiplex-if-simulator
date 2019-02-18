@@ -1,6 +1,8 @@
 # OS
 .DS_Store
 
+docs/.doctrees
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -85,6 +85,13 @@
               <!-- Local TOC -->
               <div class="local-toc"><ul>
 <li><a class="reference internal" href="#">Multiplex IF Simulator</a></li>
+<li><a class="reference internal" href="#readme-file">Readme File</a></li>
+<li><a class="reference internal" href="#id1">multiplex-if-simulator</a><ul>
+<li><a class="reference internal" href="#read-the-docs">Read the docs:</a></li>
+<li><a class="reference internal" href="#generate-a-binary-seg-map-tif-based-on-a-cell-seg-data-file">Generate a binary_seg_map.tif based on a cell seg data file</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-multiplexifsimulator">Modules</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </div>
@@ -150,8 +157,58 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="module-multiplexifsimulator">
-<span id="multiplex-if-simulator"></span><h1>Multiplex IF Simulator<a class="headerlink" href="#module-multiplexifsimulator" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="multiplex-if-simulator">
+<h1>Multiplex IF Simulator<a class="headerlink" href="#multiplex-if-simulator" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="readme-file">
+<h1>Readme File<a class="headerlink" href="#readme-file" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="id1">
+<h1>multiplex-if-simulator<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h1>
+<p>Simulate multiplex IF data</p>
+<div class="section" id="read-the-docs">
+<h2>Read the docs:<a class="headerlink" href="#read-the-docs" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="https://jason-weirather.github.io/multiplex-if-simulator/">https://jason-weirather.github.io/multiplex-if-simulator/</a></p>
+</div>
+<div class="section" id="generate-a-binary-seg-map-tif-based-on-a-cell-seg-data-file">
+<h2>Generate a binary_seg_map.tif based on a cell seg data file<a class="headerlink" href="#generate-a-binary-seg-map-tif-based-on-a-cell-seg-data-file" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">multiplexifsimulator.formats.inform</span> <span class="kn">import</span> <span class="n">FrameEmitterInForm</span>
+
+<span class="c1"># Read in a cell seg file</span>
+<span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;input/MEL3_120116_2_cell_seg_data.txt&#39;</span>
+<span class="n">seg</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># Create an image emiter that will expand cells a maximum of 17 pixels</span>
+<span class="c1">#     in each direction and will expand the processed border a further</span>
+<span class="c1">#     20 pixels</span>
+<span class="n">fe</span> <span class="o">=</span> <span class="n">FrameEmitterInForm</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1040</span><span class="p">,</span> <span class="mi">1392</span><span class="p">),</span><span class="n">cell_steps</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span><span class="n">boundary_steps</span><span class="o">=</span><span class="mi">20</span><span class="p">)</span>
+<span class="c1"># Set the cell coordinates</span>
+<span class="n">fe</span><span class="o">.</span><span class="n">set_cell_coordinates</span><span class="p">(</span><span class="n">seg</span><span class="p">[[</span><span class="s1">&#39;Cell X Position&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;Cell Y Position&#39;</span><span class="p">,</span>
+                             <span class="s1">&#39;Cell ID&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+                        <span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Cell X Position&#39;</span><span class="p">:</span><span class="s1">&#39;x&#39;</span><span class="p">,</span>
+                                 <span class="s1">&#39;Cell Y Position&#39;</span><span class="p">:</span><span class="s1">&#39;y&#39;</span><span class="p">,</span>
+                                 <span class="s1">&#39;Cell ID&#39;</span><span class="p">:</span><span class="s1">&#39;id&#39;</span><span class="p">}))</span>
+<span class="c1"># Produce numpy arrays</span>
+<span class="n">nuc</span><span class="p">,</span> <span class="n">mem</span><span class="p">,</span> <span class="n">proc</span> <span class="o">=</span> <span class="n">fe</span><span class="o">.</span><span class="n">make_cell_image</span><span class="p">()</span>
+
+<span class="c1"># Display images</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">nuc</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">mem</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">proc</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<span class="c1"># Save the combined tif</span>
+<span class="n">fe</span><span class="o">.</span><span class="n">save_binary_seg_maps</span><span class="p">(</span><span class="s1">&#39;output/MEL3_120116_2_binary_seg_maps.tif&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="module-multiplexifsimulator">
+<span id="modules"></span><h1>Modules<a class="headerlink" href="#module-multiplexifsimulator" title="Permalink to this headline">¶</a></h1>
 <dl class="class">
 <dt id="multiplexifsimulator.FrameEmitter">
 <em class="property">class </em><code class="descclassname">multiplexifsimulator.</code><code class="descname">FrameEmitter</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator.html#FrameEmitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.FrameEmitter" title="Permalink to this definition">¶</a></dt>
