@@ -61,6 +61,11 @@ class FrameEmitter(object):
             fill = '+'
             if x/xdim < random.random() and label == 'T-CELL' and y/ydim > 0.5: return '+'
             return '-'
+        def _make_gradient4(x,y,xdim,ydim,label):
+            # we want a 1 to 0 gradient of t-cell
+            fill = '+'
+            if x/xdim < random.random() and label == 'OTHER' and y/ydim > 0.3: return '+'
+            return '-'
 
         for y in range(5,ydim,10):
             for x in range(5,xdim,10):
@@ -80,9 +85,12 @@ class FrameEmitter(object):
             _make_gradient2(x['x'],xdim,x['phenotype_label'])
         ,1)
         # Make a hard PDL1 gradient on the top
-        cells['PDL1'] = cells.apply(lambda x: '+' if x['y'] > ydim/2 and x['phenotype_label']=='TUMOR'  and random.random() < 0.9 else '-',1)
+        cells['PDL1'] = cells.apply(lambda x: '+' if x['y'] < 2*ydim/3 and x['phenotype_label']=='TUMOR'  and random.random() < 0.9 else '-',1)
         cells['PD1'] = cells.apply(lambda x: 
             _make_gradient3(x['x'],x['y'],xdim,ydim,x['phenotype_label'])
+        ,1)
+        cells['PDL1'] = cells.apply(lambda x: 
+            _make_gradient4(x['x'],x['y'],xdim,ydim,x['phenotype_label'])
         ,1)
         cells = cells.sort_values('phenotype_label').set_index('id').reset_index(drop=True).reset_index().\
             rename(columns={'index':'id'})

@@ -31,8 +31,8 @@ class FrameEmitterInForm(FrameEmitter):
                 tif.save(self.processed_image.astype(np.uint16), 
                          compress=9, description=_pro_xml)
 
-    def make_inform_frame(self,base_path,sample_name,frame_name):
-        cells = self.gradient_model1()
+    def make_inform_frame(self,model_cells,base_path,sample_name,frame_name):
+        #cells = self.gradient_model1()
         self.set_cell_coordinates(cells)
         cell_seg = _construct_cell_seg(cells)
         score = _construct_score(cells)
