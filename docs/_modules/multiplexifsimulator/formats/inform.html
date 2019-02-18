@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>multiplexifsimulator.formats.inform &mdash; Multiplex IF Simulator 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Multiplex IF Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"></div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Multiplex IF Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../multiplexifsimulator.html">multiplexifsimulator</a> &raquo;</li>
+        
+      <li>multiplexifsimulator.formats.inform</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for multiplexifsimulator.formats.inform</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">multiplexifsimulator</span> <span class="k">import</span> <span class="n">FrameEmitter</span>
+<span class="kn">from</span> <span class="nn">tifffile</span> <span class="k">import</span> <span class="n">TiffWriter</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="n">_nuc_xml</span> <span class="o">=</span> <span class="s1">&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;</span><span class="se">\r\n</span><span class="s1">&lt;SegmentationImage&gt;</span><span class="se">\r\n</span><span class="s1"> &lt;Version&gt;1&lt;/Version&gt;</span><span class="se">\r\n</span><span class="s1"> &lt;CompartmentType&gt;Nucleus&lt;/CompartmentType&gt;</span><span class="se">\r\n</span><span class="s1">&lt;/SegmentationImage&gt;&#39;</span>
+<span class="n">_mem_xml</span> <span class="o">=</span> <span class="s1">&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;</span><span class="se">\r\n</span><span class="s1">&lt;SegmentationImage&gt;</span><span class="se">\r\n</span><span class="s1"> &lt;Version&gt;1&lt;/Version&gt;</span><span class="se">\r\n</span><span class="s1"> &lt;CompartmentType&gt;Membrane&lt;/CompartmentType&gt;</span><span class="se">\r\n</span><span class="s1">&lt;/SegmentationImage&gt;&#39;</span>
+<span class="n">_pro_xml</span> <span class="o">=</span> <span class="s1">&#39;&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-16&quot;?&gt;</span><span class="se">\r\n</span><span class="s1">&lt;ProcessRegionImage&gt;</span><span class="se">\r\n</span><span class="s1"> &lt;Version&gt;1&lt;/Version&gt;</span><span class="se">\r\n</span><span class="s1">&lt;/ProcessRegionImage&gt;&#39;</span>
+<div class="viewcode-block" id="FrameEmitterInForm"><a class="viewcode-back" href="../../../index.html#multiplexifsimulator.formats.inform.FrameEmitterInForm">[docs]</a><span class="k">class</span> <span class="nc">FrameEmitterInForm</span><span class="p">(</span><span class="n">FrameEmitter</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate mIF data similar in shape to InForm Exports.</span>
+
+<span class="sd">    Extends **FrameEmitter**</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">1040</span><span class="p">,</span><span class="mi">1392</span><span class="p">),</span>
+                      <span class="n">cell_steps</span><span class="o">=</span><span class="mi">17</span><span class="p">,</span>
+                      <span class="n">boundary_steps</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FrameEmitterInForm</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span><span class="n">cell_steps</span><span class="o">=</span><span class="n">cell_steps</span><span class="p">,</span><span class="n">boundary_steps</span><span class="o">=</span><span class="n">boundary_steps</span><span class="p">)</span>
+        <span class="k">return</span>        
+<div class="viewcode-block" id="FrameEmitterInForm.save_binary_seg_maps"><a class="viewcode-back" href="../../../index.html#multiplexifsimulator.formats.inform.FrameEmitterInForm.save_binary_seg_maps">[docs]</a>    <span class="k">def</span> <span class="nf">save_binary_seg_maps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">path</span><span class="p">,</span><span class="n">processed_image</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save a binary_seg_map image based on the **.make_cell_image_()** images in a python-readable format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">TiffWriter</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">tif</span><span class="p">:</span>
+            <span class="n">tif</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">),</span> 
+                     <span class="n">compress</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">extratags</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;ImageDescription&#39;</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">_nuc_xml</span><span class="p">,</span><span class="kc">True</span><span class="p">)])</span>
+            <span class="n">tif</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edge_image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">),</span> 
+                     <span class="n">compress</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">extratags</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;ImageDescription&#39;</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">_mem_xml</span><span class="p">,</span><span class="kc">True</span><span class="p">)])</span>
+            <span class="k">if</span> <span class="n">processed_image</span><span class="p">:</span>
+                <span class="n">tif</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processed_image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">),</span> 
+                         <span class="n">compress</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">extratags</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;ImageDescription&#39;</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">_pro_xml</span><span class="p">,</span><span class="kc">True</span><span class="p">)])</span></div>
+<div class="viewcode-block" id="FrameEmitterInForm.save_binary_seg_maps_r"><a class="viewcode-back" href="../../../index.html#multiplexifsimulator.formats.inform.FrameEmitterInForm.save_binary_seg_maps_r">[docs]</a>    <span class="k">def</span> <span class="nf">save_binary_seg_maps_r</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">path</span><span class="p">,</span><span class="n">processed_image</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save a binary_seg_map image based on the **.make_cell_image_()** images in an R-readable format</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">TiffWriter</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">tif</span><span class="p">:</span>
+            <span class="n">tif</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cell_image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">),</span> 
+                     <span class="n">compress</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">_nuc_xml</span><span class="p">)</span>
+            <span class="n">tif</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edge_image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">),</span> 
+                     <span class="n">compress</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">_mem_xml</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">processed_image</span><span class="p">:</span>
+                <span class="n">tif</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processed_image</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">),</span> 
+                         <span class="n">compress</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">_pro_xml</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FrameEmitterInForm.make_inform_frame"><a class="viewcode-back" href="../../../index.html#multiplexifsimulator.formats.inform.FrameEmitterInForm.make_inform_frame">[docs]</a>    <span class="k">def</span> <span class="nf">make_inform_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">model_cells</span><span class="p">,</span><span class="n">base_path</span><span class="p">,</span><span class="n">sample_name</span><span class="p">,</span><span class="n">frame_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Save the inform &#39;cell_seg_data.txt&#39;, &#39;score_data.txt&#39; and &#39;binary_seg_maps.tif&#39; </span>
+<span class="sd">        to  **basepath/sample_name/**</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_cell_coordinates</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
+        <span class="n">cell_seg</span> <span class="o">=</span> <span class="n">_construct_cell_seg</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">_construct_score</span><span class="p">(</span><span class="n">cells</span><span class="p">)</span>
+        <span class="n">score</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span><span class="s1">&#39;Sample Name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">frame_name</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_path</span><span class="p">,</span><span class="n">sample_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">cell_seg</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">sample_name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">frame_name</span><span class="o">+</span><span class="s1">&#39;_cell_seg_data.txt&#39;</span><span class="p">),</span>
+            <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">score</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">sample_name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">frame_name</span><span class="o">+</span><span class="s1">&#39;_score_data.txt&#39;</span><span class="p">),</span>
+            <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">make_cell_image</span><span class="p">()</span>
+        <span class="n">bfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="n">sample_name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="n">frame_name</span><span class="o">+</span><span class="s1">&#39;_binary_seg_maps.tif&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_binary_seg_maps</span><span class="p">(</span><span class="n">bfile</span><span class="p">,</span><span class="n">processed_image</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="c1">#path,cell_seg,score</span></div></div>
+        
+
+<span class="k">def</span> <span class="nf">_construct_cell_seg</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Cell ID&#39;</span><span class="p">,</span><span class="s1">&#39;Cell X Position&#39;</span><span class="p">,</span><span class="s1">&#39;Cell Y Position&#39;</span><span class="p">,</span><span class="s1">&#39;Nucleus Area (pixels)&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Nucleus Area (percent)&#39;</span><span class="p">,</span><span class="s1">&#39;Nucleus Compactness&#39;</span><span class="p">,</span><span class="s1">&#39;Nucleus Minor Axis&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Nucleus Major Axis&#39;</span><span class="p">,</span><span class="s1">&#39;Entire Cell PD-1 (Opal 540) Mean (Normalized Counts, Total Weighting)&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Nucleus PD-1 (Opal 540) Mean (Normalized Counts, Total Weighting)&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Membrane PD-1 (Opal 540) Mean (Normalized Counts, Total Weighting)&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Membrane Area (pixels)&#39;</span><span class="p">,</span><span class="s1">&#39;Membrane Area (percent)&#39;</span><span class="p">,</span><span class="s1">&#39;Membrane Compactness&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Membrane Minor Axis&#39;</span><span class="p">,</span><span class="s1">&#39;Membrane Major Axis&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Nucleus PD-Ligand-1 (Opal 690) Mean (Normalized Counts, Total Weighting)&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Entire Cell PD-Ligand-1 (Opal 690) Mean (Normalized Counts, Total Weighting)&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Membrane PD-Ligand-1 (Opal 690) Mean (Normalized Counts, Total Weighting)&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Entire Cell Area (pixels)&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Entire Cell Area (percent)&#39;</span><span class="p">,</span><span class="s1">&#39;Entire Cell Compactness&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Entire Cell Minor Axis&#39;</span><span class="p">,</span><span class="s1">&#39;Entire Cell Major Axis&#39;</span><span class="p">,</span><span class="s1">&#39;Phenotype&#39;</span><span class="p">,</span><span class="s1">&#39;Confidence&#39;</span><span class="p">]</span>
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">cells</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;id&#39;</span><span class="p">:</span><span class="s1">&#39;Cell ID&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="s1">&#39;Cell X Position&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="s1">&#39;Cell Y Position&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;phenotype_label&#39;</span><span class="p">:</span><span class="s1">&#39;Phenotype&#39;</span><span class="p">})</span>
+    <span class="n">fill_in</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">header</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">cs</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">fill_in</span><span class="p">:</span> <span class="n">cs</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">cs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cs</span><span class="p">[</span><span class="s1">&#39;PD1&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="n">cs</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;PD-1&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">cs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">cs</span><span class="p">[</span><span class="s1">&#39;PDL1&#39;</span><span class="p">]</span><span class="o">==</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="n">cs</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="s1">&#39;PD-Ligand-1&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">cs</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;PD1&#39;</span><span class="p">,</span><span class="s1">&#39;PDL1&#39;</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">_construct_score</span><span class="p">(</span><span class="n">cells</span><span class="p">):</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Path&#39;</span><span class="p">,</span><span class="s1">&#39;Sample Name&#39;</span><span class="p">,</span><span class="s1">&#39;Tissue Category&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;First Cell Compartment&#39;</span><span class="p">,</span><span class="s1">&#39;First Stain Component&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Second Cell Compartment&#39;</span><span class="p">,</span><span class="s1">&#39;Second Stain Component&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Double Negative&#39;</span><span class="p">,</span><span class="s1">&#39;Single PD-Ligand-1 (Opal 690)&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Single PD-1 (Opal 540)&#39;</span><span class="p">,</span><span class="s1">&#39;Double Positive&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;Tissue Category Area (Percent)&#39;</span><span class="p">,</span><span class="s1">&#39;Number of Cells&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;PD-Ligand-1 (Opal 690) Threshold&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;PD-1 (Opal 540) Threshold&#39;</span><span class="p">,</span><span class="s1">&#39;Lab ID&#39;</span><span class="p">,</span><span class="s1">&#39;Slide ID&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;TMA Sector&#39;</span><span class="p">,</span><span class="s1">&#39;TMA Row&#39;</span><span class="p">,</span><span class="s1">&#39;TMA Column&#39;</span><span class="p">,</span><span class="s1">&#39;TMA Field&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;inForm 2.1.5430.24864&#39;</span><span class="p">]</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">)</span><span class="o">*</span><span class="p">[</span><span class="mf">0.5</span><span class="p">]],</span><span class="n">columns</span><span class="o">=</span><span class="n">header</span><span class="p">)</span>
+    <span class="n">score</span><span class="p">[</span><span class="s1">&#39;Path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/location&#39;</span>
+    <span class="n">score</span><span class="p">[</span><span class="s1">&#39;Sample Name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;sample_name&#39;</span>
+    <span class="n">score</span><span class="p">[</span><span class="s1">&#39;Tissue Category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">score</span><span class="p">[</span><span class="s1">&#39;First Stain Component&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;PD-Ligand-1 (Opal 690)&#39;</span>
+    <span class="n">score</span><span class="p">[</span><span class="s1">&#39;Second Stain Component&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;PD-1 (Opal 540)&#39;</span>
+    <span class="n">score</span><span class="p">[</span><span class="s1">&#39;First Cell Compartment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Membrane&#39;</span>
+    <span class="n">score</span><span class="p">[</span><span class="s1">&#39;Second Cell Compartment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;Nucleus&#39;</span>
+    <span class="k">return</span> <span class="n">score</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Jason L Weirather
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

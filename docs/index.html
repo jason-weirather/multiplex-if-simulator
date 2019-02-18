@@ -1,0 +1,392 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Multiplex IF Simulator &mdash; Multiplex IF Simulator 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> Multiplex IF Simulator
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Multiplex IF Simulator</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Multiplex IF Simulator</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>Multiplex IF Simulator</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-multiplexifsimulator">
+<span id="multiplex-if-simulator"></span><h1>Multiplex IF Simulator<a class="headerlink" href="#module-multiplexifsimulator" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="multiplexifsimulator.FrameEmitter">
+<em class="property">class </em><code class="descclassname">multiplexifsimulator.</code><code class="descname">FrameEmitter</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator.html#FrameEmitter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.FrameEmitter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic class for generating a mIF dataset</p>
+<dl class="docutils">
+<dt>Common properties:</dt>
+<dd><ul class="first last simple">
+<li><strong>shape</strong> (tuple) - the size of the image integers (y,x)</li>
+<li><strong>cell_steps</strong> (int) - how many pixels to try to fill out in the process of defining a cell</li>
+<li><strong>boundary_steps</strong> (int) - how many pixels farther than the image to fill out to define the active region</li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="multiplexifsimulator.FrameEmitter.make_cell_image">
+<code class="descname">make_cell_image</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator.html#FrameEmitter.make_cell_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.FrameEmitter.make_cell_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Requires the ‘locations’ be set by <strong>*.set_cell_coordinates(cell_df)</strong></p>
+<dl class="docutils">
+<dt>Sets properties:</dt>
+<dd><ul class="first last simple">
+<li>cell_image (numpy.array)</li>
+<li>edge_image (numpy.array)</li>
+<li>processed_image (numpy.array)</li>
+</ul>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li>cell_image</li>
+<li>edge_image</li>
+<li>processed_image</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiplexifsimulator.FrameEmitter.set_cell_coordinates">
+<code class="descname">set_cell_coordinates</code><span class="sig-paren">(</span><em>cell_df</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator.html#FrameEmitter.set_cell_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.FrameEmitter.set_cell_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the cell positions with a DataFrame.  <em>id</em> field is optional.
+If not set the is will be shuffled.</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">id</th>
+<th class="head">x</th>
+<th class="head">y</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>1</td>
+<td>5</td>
+<td>5</td>
+</tr>
+<tr class="row-odd"><td>2</td>
+<td>25</td>
+<td>5</td>
+</tr>
+<tr class="row-even"><td>3</td>
+<td>45</td>
+<td>5</td>
+</tr>
+<tr class="row-odd"><td>4</td>
+<td>65</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-multiplexifsimulator.formats.inform"></span><dl class="class">
+<dt id="multiplexifsimulator.formats.inform.FrameEmitterInForm">
+<em class="property">class </em><code class="descclassname">multiplexifsimulator.formats.inform.</code><code class="descname">FrameEmitterInForm</code><span class="sig-paren">(</span><em>shape=(1040</em>, <em>1392)</em>, <em>cell_steps=17</em>, <em>boundary_steps=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator/formats/inform.html#FrameEmitterInForm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.formats.inform.FrameEmitterInForm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate mIF data similar in shape to InForm Exports.</p>
+<p>Extends <strong>FrameEmitter</strong></p>
+<dl class="method">
+<dt id="multiplexifsimulator.formats.inform.FrameEmitterInForm.make_inform_frame">
+<code class="descname">make_inform_frame</code><span class="sig-paren">(</span><em>model_cells</em>, <em>base_path</em>, <em>sample_name</em>, <em>frame_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator/formats/inform.html#FrameEmitterInForm.make_inform_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.formats.inform.FrameEmitterInForm.make_inform_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the inform ‘cell_seg_data.txt’, ‘score_data.txt’ and ‘binary_seg_maps.tif’
+to  <strong>basepath/sample_name/</strong></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiplexifsimulator.formats.inform.FrameEmitterInForm.save_binary_seg_maps">
+<code class="descname">save_binary_seg_maps</code><span class="sig-paren">(</span><em>path</em>, <em>processed_image=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator/formats/inform.html#FrameEmitterInForm.save_binary_seg_maps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.formats.inform.FrameEmitterInForm.save_binary_seg_maps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a binary_seg_map image based on the <strong>.make_cell_image_()</strong> images in a python-readable format</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiplexifsimulator.formats.inform.FrameEmitterInForm.save_binary_seg_maps_r">
+<code class="descname">save_binary_seg_maps_r</code><span class="sig-paren">(</span><em>path</em>, <em>processed_image=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator/formats/inform.html#FrameEmitterInForm.save_binary_seg_maps_r"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.formats.inform.FrameEmitterInForm.save_binary_seg_maps_r" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a binary_seg_map image based on the <strong>.make_cell_image_()</strong> images in an R-readable format</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-multiplexifsimulator.models"></span><dl class="class">
+<dt id="multiplexifsimulator.models.SlideModelGeneric">
+<em class="property">class </em><code class="descclassname">multiplexifsimulator.models.</code><code class="descname">SlideModelGeneric</code><span class="sig-paren">(</span><em>shape</em>, <em>cell_width=10</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator/models.html#SlideModelGeneric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.models.SlideModelGeneric" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Generic class to spawn cell frames based on different models</p>
+<dl class="docutils">
+<dt>General properties:</dt>
+<dd><ul class="first last simple">
+<li><strong>shape</strong> (tuple) the integers (y,x) dimensions</li>
+<li><strong>cell_width</strong> (int)</li>
+<li><strong>offset</strong> (int) distnace to offset from side and every other row</li>
+<li><strong>cells</strong> (int) the pandas.DataFrame with cell and phenotype information</li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="multiplexifsimulator.models.SlideModelGeneric.expanded_cells">
+<code class="descname">expanded_cells</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator/models.html#SlideModelGeneric.expanded_cells"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.models.SlideModelGeneric.expanded_cells" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">pandas.DataFrame with all phenotypes expanded in the phenotype_label</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiplexifsimulator.models.SlideModelGeneric.fill_gradient_margin">
+<code class="descname">fill_gradient_margin</code><span class="sig-paren">(</span><em>column_name='phenotype_label', fill_label='TUMOR', axis='x', breaks=[0.5, 0.75], fill_probability=[1, 0], condition=&lt;function SlideModelGeneric.&lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator/models.html#SlideModelGeneric.fill_gradient_margin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.models.SlideModelGeneric.fill_gradient_margin" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Set a tme with a loose margin between the breaks</dt>
+<dd>set_fraction is how frequently to apply the tumor label</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="multiplexifsimulator.models.SlideModelGeneric.fill_uniform">
+<code class="descname">fill_uniform</code><span class="sig-paren">(</span><em>column_name='phenotype_label'</em>, <em>fill_label='TUMOR'</em>, <em>fill_probability=0.5</em>, <em>condition=&lt;function SlideModelGeneric.&lt;lambda&gt;&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator/models.html#SlideModelGeneric.fill_uniform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.models.SlideModelGeneric.fill_uniform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the <strong>cells</strong> property with added cell phenotypes uniformally randomly distributed</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="multiplexifsimulator.models.random">
+<code class="descclassname">multiplexifsimulator.models.</code><code class="descname">random</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; x in the interval [0, 1).<a class="headerlink" href="#multiplexifsimulator.models.random" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="module-multiplexifsimulator.models.general"></span><dl class="class">
+<dt id="multiplexifsimulator.models.general.SlideModelExcluded">
+<em class="property">class </em><code class="descclassname">multiplexifsimulator.models.general.</code><code class="descname">SlideModelExcluded</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator/models/general.html#SlideModelExcluded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.models.general.SlideModelExcluded" title="Permalink to this definition">¶</a></dt>
+<dd><p>A slide where there are more T cells outside of the tumor than inside of the
+tumor and an immunosuppressive phenotypes inside the tumor</p>
+<div class="figure">
+<img alt="_images/exclusion.png" src="_images/exclusion.png" />
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="multiplexifsimulator.models.general.SlideModelInfiltrated">
+<em class="property">class </em><code class="descclassname">multiplexifsimulator.models.general.</code><code class="descname">SlideModelInfiltrated</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator/models/general.html#SlideModelInfiltrated"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.models.general.SlideModelInfiltrated" title="Permalink to this definition">¶</a></dt>
+<dd><p>A slide where there are more T cells outside of the tumor than inside of the
+tumor and an immunosuppressive phenotypes inside the tumor</p>
+<div class="figure">
+<img alt="_images/infiltration.png" src="_images/infiltration.png" />
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="multiplexifsimulator.models.general.SlideModelUniform">
+<em class="property">class </em><code class="descclassname">multiplexifsimulator.models.general.</code><code class="descname">SlideModelUniform</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/multiplexifsimulator/models/general.html#SlideModelUniform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#multiplexifsimulator.models.general.SlideModelUniform" title="Permalink to this definition">¶</a></dt>
+<dd><p>A slide where all cells are uniformally distributed</p>
+<div class="figure">
+<img alt="_images/uniform.png" src="_images/uniform.png" />
+</div>
+</dd></dl>
+
+<div class="toctree-wrapper compound">
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Jason L Weirather
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
