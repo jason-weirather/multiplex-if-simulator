@@ -2,6 +2,10 @@
 
 Simulate multiplex IF data 
 
+### Read the docs:
+
+https://jason-weirather.github.io/multiplex-if-simulator/
+
 ### Generate a binary_seg_map.tif based on a cell seg data file
 
 ```python
