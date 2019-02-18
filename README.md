@@ -42,13 +42,13 @@ plt.imshow(processed_image,origin='lower')
 plt.show()
 ```
 
-![Image of phenotypes](https://multiplexifsimulator.github.com/images/phenotypes.png)
+![Image of phenotypes](images/phenotypes.png?raw=true)
 
-![Image of cell map](https://multiplexifsimulator.github.com/images/cell_map.png)
+![Image of cell map](images/cell_map.png?raw=true)
 
-![Image of edge map](https://multiplexifsimulator.github.com/images/edge_map.png)
+![Image of edge map](images/edge_map.png?raw=true)
 
-![Image of processed area](https://multiplexifsimulator.github.com/images/processed_image.png)
+![Image of processed area](images/processed_image.png?raw=true)
 
 
 ```{python}
