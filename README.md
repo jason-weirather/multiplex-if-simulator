@@ -211,7 +211,7 @@ import matplotlib.pyplot as plt
 from multiplexifsimulator.formats.inform import FrameEmitterInForm
 
 # Read in a cell seg file
-fname = 'input/MEL3_120116_2_cell_seg_data.txt'
+fname = 'input/MEL3_2_cell_seg_data.txt'
 seg = pd.read_csv(fname,sep="\t")
 
 # Create an image emiter that will expand cells a maximum of 17 pixels
@@ -237,5 +237,5 @@ plt.imshow(proc)
 plt.show()
 
 # Save the combined tif
-fe.save_binary_seg_maps('output/MEL3_120116_2_binary_seg_maps.tif')
+fe.save_binary_seg_maps('output/MEL3_2_binary_seg_maps.tif')
 ```

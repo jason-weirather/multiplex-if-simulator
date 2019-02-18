@@ -88,12 +88,9 @@
 <li><a class="reference internal" href="#readme-file">Readme File</a></li>
 <li><a class="reference internal" href="#id1">multiplex-if-simulator</a><ul>
 <li><a class="reference internal" href="#read-the-docs-https-jason-weirather-github-io-multiplex-if-simulator">Read the docs: https://jason-weirather.github.io/multiplex-if-simulator/</a></li>
-<li><a class="reference internal" href="#quickstart">Quickstart</a><ul>
-<li><a class="reference internal" href="#generate-a-binary-seg-map-tif-based-on-a-cell-seg-data-file">Generate a binary_seg_map.tif based on a cell seg data file</a></li>
 </ul>
 </li>
-</ul>
-</li>
+<li><a class="reference internal" href="#quickstart">Quickstart</a></li>
 <li><a class="reference internal" href="#module-multiplexifsimulator">Modules</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
@@ -172,9 +169,9 @@
 <div class="section" id="read-the-docs-https-jason-weirather-github-io-multiplex-if-simulator">
 <h2>Read the docs: <a class="reference external" href="https://jason-weirather.github.io/multiplex-if-simulator/">https://jason-weirather.github.io/multiplex-if-simulator/</a><a class="headerlink" href="#read-the-docs-https-jason-weirather-github-io-multiplex-if-simulator" title="Permalink to this headline">¶</a></h2>
 </div>
+</div>
 <div class="section" id="quickstart">
-<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
-<p>Generate a small Infiltrated mIF image</p>
+<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">multiplexifsimulator.models.general</span> <span class="kn">import</span> <span class="n">SlideModelInfiltrated</span> <span class="k">as</span> <span class="n">SMI</span>
 <span class="kn">from</span> <span class="nn">multiplexifsimulator.formats.inform</span> <span class="kn">import</span> <span class="n">FrameEmitterInForm</span>
 <span class="kn">from</span> <span class="nn">plotnine</span> <span class="kn">import</span> <span class="o">*</span>
@@ -212,13 +209,158 @@
 <a class="reference external image-reference" href="https://github.com/jason-weirather/multiplex-if-simulator/raw/master/images/cell_map.png?raw=true"><img alt="Image of cell map" src="https://github.com/jason-weirather/multiplex-if-simulator/raw/master/images/cell_map.png?raw=true" /></a>
 <a class="reference external image-reference" href="https://github.com/jason-weirather/multiplex-if-simulator/raw/master/images/edge_map.png?raw=true"><img alt="Image of edge map" src="https://github.com/jason-weirather/multiplex-if-simulator/raw/master/images/edge_map.png?raw=true" /></a>
 <a class="reference external image-reference" href="https://github.com/jason-weirather/multiplex-if-simulator/raw/master/images/processed_image.png?raw=true"><img alt="Image of processed area" src="https://github.com/jason-weirather/multiplex-if-simulator/raw/master/images/processed_image.png?raw=true" /></a>
-<div class="section" id="generate-a-binary-seg-map-tif-based-on-a-cell-seg-data-file">
-<h3>Generate a binary_seg_map.tif based on a cell seg data file<a class="headerlink" href="#generate-a-binary-seg-map-tif-based-on-a-cell-seg-data-file" title="Permalink to this headline">¶</a></h3>
+<p>This will have 4 samples with 3 images each from 3 different model types
+It will create both a python compatible <code class="docutils literal notranslate"><span class="pre">Example</span></code> folder and an R compatible
+<code class="docutils literal notranslate"><span class="pre">Example-R</span></code> folder</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">multiplexifsimulator.formats.inform</span> <span class="kn">import</span> <span class="n">FrameEmitterInForm</span>
+<span class="kn">from</span> <span class="nn">multiplexifsimulator.models.general</span> <span class="kn">import</span> <span class="n">SlideModelExcluded</span> <span class="k">as</span> <span class="n">SME</span>
+<span class="kn">from</span> <span class="nn">multiplexifsimulator.models.general</span> <span class="kn">import</span> <span class="n">SlideModelInfiltrated</span> <span class="k">as</span> <span class="n">SMI</span>
+<span class="kn">from</span> <span class="nn">multiplexifsimulator.models.general</span> <span class="kn">import</span> <span class="n">SlideModelUniform</span> <span class="k">as</span> <span class="n">SMU</span>
+
+<span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">400</span><span class="p">,</span><span class="mi">600</span><span class="p">)</span>
+<span class="n">fe</span> <span class="o">=</span> <span class="n">FrameEmitterInForm</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">SME</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">cells</span>
+        <span class="n">fe</span><span class="o">.</span><span class="n">make_inform_frame</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s1">&#39;Example&#39;</span><span class="p">,</span><span class="s1">&#39;E&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="n">fe</span><span class="o">.</span><span class="n">make_inform_frame</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s1">&#39;Example-R&#39;</span><span class="p">,</span><span class="s1">&#39;E&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="n">r_format</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">SMI</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">cells</span>
+        <span class="n">fe</span><span class="o">.</span><span class="n">make_inform_frame</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s1">&#39;Example&#39;</span><span class="p">,</span><span class="s1">&#39;I&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="n">fe</span><span class="o">.</span><span class="n">make_inform_frame</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s1">&#39;Example-R&#39;</span><span class="p">,</span><span class="s1">&#39;I&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="n">r_format</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">SMU</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">cells</span>
+        <span class="n">fe</span><span class="o">.</span><span class="n">make_inform_frame</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s1">&#39;Example&#39;</span><span class="p">,</span><span class="s1">&#39;U&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="n">fe</span><span class="o">.</span><span class="n">make_inform_frame</span><span class="p">(</span><span class="n">c</span><span class="p">,</span><span class="s1">&#39;Example-R&#39;</span><span class="p">,</span><span class="s1">&#39;U&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span><span class="n">r_format</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-guess notranslate"><div class="highlight"><pre><span></span>$ tree Example
+Example
+├── E1
+│   ├── E1_1_binary_seg_maps.tif
+│   ├── E1_1_cell_seg_data.txt
+│   ├── E1_1_score_data.txt
+│   ├── E1_2_binary_seg_maps.tif
+│   ├── E1_2_cell_seg_data.txt
+│   ├── E1_2_score_data.txt
+│   ├── E1_3_binary_seg_maps.tif
+│   ├── E1_3_cell_seg_data.txt
+│   └── E1_3_score_data.txt
+├── E2
+│   ├── E2_1_binary_seg_maps.tif
+│   ├── E2_1_cell_seg_data.txt
+│   ├── E2_1_score_data.txt
+│   ├── E2_2_binary_seg_maps.tif
+│   ├── E2_2_cell_seg_data.txt
+│   ├── E2_2_score_data.txt
+│   ├── E2_3_binary_seg_maps.tif
+│   ├── E2_3_cell_seg_data.txt
+│   └── E2_3_score_data.txt
+├── E3
+│   ├── E3_1_binary_seg_maps.tif
+│   ├── E3_1_cell_seg_data.txt
+│   ├── E3_1_score_data.txt
+│   ├── E3_2_binary_seg_maps.tif
+│   ├── E3_2_cell_seg_data.txt
+│   ├── E3_2_score_data.txt
+│   ├── E3_3_binary_seg_maps.tif
+│   ├── E3_3_cell_seg_data.txt
+│   └── E3_3_score_data.txt
+├── E4
+│   ├── E4_1_binary_seg_maps.tif
+│   ├── E4_1_cell_seg_data.txt
+│   ├── E4_1_score_data.txt
+│   ├── E4_2_binary_seg_maps.tif
+│   ├── E4_2_cell_seg_data.txt
+│   ├── E4_2_score_data.txt
+│   ├── E4_3_binary_seg_maps.tif
+│   ├── E4_3_cell_seg_data.txt
+│   └── E4_3_score_data.txt
+├── I1
+│   ├── I1_1_binary_seg_maps.tif
+│   ├── I1_1_cell_seg_data.txt
+│   ├── I1_1_score_data.txt
+│   ├── I1_2_binary_seg_maps.tif
+│   ├── I1_2_cell_seg_data.txt
+│   ├── I1_2_score_data.txt
+│   ├── I1_3_binary_seg_maps.tif
+│   ├── I1_3_cell_seg_data.txt
+│   └── I1_3_score_data.txt
+├── I2
+│   ├── I2_1_binary_seg_maps.tif
+│   ├── I2_1_cell_seg_data.txt
+│   ├── I2_1_score_data.txt
+│   ├── I2_2_binary_seg_maps.tif
+│   ├── I2_2_cell_seg_data.txt
+│   ├── I2_2_score_data.txt
+│   ├── I2_3_binary_seg_maps.tif
+│   ├── I2_3_cell_seg_data.txt
+│   └── I2_3_score_data.txt
+├── I3
+│   ├── I3_1_binary_seg_maps.tif
+│   ├── I3_1_cell_seg_data.txt
+│   ├── I3_1_score_data.txt
+│   ├── I3_2_binary_seg_maps.tif
+│   ├── I3_2_cell_seg_data.txt
+│   ├── I3_2_score_data.txt
+│   ├── I3_3_binary_seg_maps.tif
+│   ├── I3_3_cell_seg_data.txt
+│   └── I3_3_score_data.txt
+├── I4
+│   ├── I4_1_binary_seg_maps.tif
+│   ├── I4_1_cell_seg_data.txt
+│   ├── I4_1_score_data.txt
+│   ├── I4_2_binary_seg_maps.tif
+│   ├── I4_2_cell_seg_data.txt
+│   ├── I4_2_score_data.txt
+│   ├── I4_3_binary_seg_maps.tif
+│   ├── I4_3_cell_seg_data.txt
+│   └── I4_3_score_data.txt
+├── U1
+│   ├── U1_1_binary_seg_maps.tif
+│   ├── U1_1_cell_seg_data.txt
+│   ├── U1_1_score_data.txt
+│   ├── U1_2_binary_seg_maps.tif
+│   ├── U1_2_cell_seg_data.txt
+│   ├── U1_2_score_data.txt
+│   ├── U1_3_binary_seg_maps.tif
+│   ├── U1_3_cell_seg_data.txt
+│   └── U1_3_score_data.txt
+├── U2
+│   ├── U2_1_binary_seg_maps.tif
+│   ├── U2_1_cell_seg_data.txt
+│   ├── U2_1_score_data.txt
+│   ├── U2_2_binary_seg_maps.tif
+│   ├── U2_2_cell_seg_data.txt
+│   ├── U2_2_score_data.txt
+│   ├── U2_3_binary_seg_maps.tif
+│   ├── U2_3_cell_seg_data.txt
+│   └── U2_3_score_data.txt
+├── U3
+│   ├── U3_1_binary_seg_maps.tif
+│   ├── U3_1_cell_seg_data.txt
+│   ├── U3_1_score_data.txt
+│   ├── U3_2_binary_seg_maps.tif
+│   ├── U3_2_cell_seg_data.txt
+│   ├── U3_2_score_data.txt
+│   ├── U3_3_binary_seg_maps.tif
+│   ├── U3_3_cell_seg_data.txt
+│   └── U3_3_score_data.txt
+└── U4
+    ├── U4_1_binary_seg_maps.tif
+    ├── U4_1_cell_seg_data.txt
+    ├── U4_1_score_data.txt
+    ├── U4_2_binary_seg_maps.tif
+    ├── U4_2_cell_seg_data.txt
+    ├── U4_2_score_data.txt
+    ├── U4_3_binary_seg_maps.tif
+    ├── U4_3_cell_seg_data.txt
+    └── U4_3_score_data.txt
+</pre></div>
+</div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">multiplexifsimulator.formats.inform</span> <span class="kn">import</span> <span class="n">FrameEmitterInForm</span>
 
 <span class="c1"># Read in a cell seg file</span>
-<span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;input/MEL3_120116_2_cell_seg_data.txt&#39;</span>
+<span class="n">fname</span> <span class="o">=</span> <span class="s1">&#39;input/MEL3_2_cell_seg_data.txt&#39;</span>
 <span class="n">seg</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span>
 
 <span class="c1"># Create an image emiter that will expand cells a maximum of 17 pixels</span>
@@ -244,10 +386,8 @@
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
 <span class="c1"># Save the combined tif</span>
-<span class="n">fe</span><span class="o">.</span><span class="n">save_binary_seg_maps</span><span class="p">(</span><span class="s1">&#39;output/MEL3_120116_2_binary_seg_maps.tif&#39;</span><span class="p">)</span>
+<span class="n">fe</span><span class="o">.</span><span class="n">save_binary_seg_maps</span><span class="p">(</span><span class="s1">&#39;output/MEL3_2_binary_seg_maps.tif&#39;</span><span class="p">)</span>
 </pre></div>
-</div>
-</div>
 </div>
 </div>
 <div class="section" id="module-multiplexifsimulator">
