@@ -51,7 +51,6 @@ plt.show()
 ![Image of processed area](https://github.com/jason-weirather/multiplex-if-simulator/raw/master/images/processed_image.png?raw=true)
 
 
-```python
 
 ### Generate a binary_seg_map.tif based on a cell seg data file
 
