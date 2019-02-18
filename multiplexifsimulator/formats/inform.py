@@ -42,14 +42,14 @@ class FrameEmitterInForm(FrameEmitter):
                 tif.save(self.processed_image.astype(np.uint16), 
                          compress=9, description=_pro_xml)
 
-    def make_inform_frame(self,model_cells,base_path,sample_name,frame_name):
+    def make_inform_frame(self,model_cells,base_path,sample_name,frame_name,r_format=False):
         """
         Save the inform 'cell_seg_data.txt', 'score_data.txt' and 'binary_seg_maps.tif' 
         to  **basepath/sample_name/**
         """
-        self.set_cell_coordinates(cells)
-        cell_seg = _construct_cell_seg(cells)
-        score = _construct_score(cells)
+        self.set_cell_coordinates(model_cells)
+        cell_seg = _construct_cell_seg(model_cells)
+        score = _construct_score(model_cells)
         score.loc[:,'Sample Name'] = frame_name
         path = os.path.join(base_path,sample_name)
         if not os.path.exists(path):
@@ -60,7 +60,10 @@ class FrameEmitterInForm(FrameEmitter):
             index=False,sep="\t")
         self.make_cell_image()
         bfile = os.path.join(path,sample_name+'_'+frame_name+'_binary_seg_maps.tif')
-        self.save_binary_seg_maps(bfile,processed_image=True)
+        if r_format:
+            self.save_binary_seg_maps_r(bfile,processed_image=True)
+        else:
+            self.save_binary_seg_maps(bfile,processed_image=True)
         return #path,cell_seg,score
         
 

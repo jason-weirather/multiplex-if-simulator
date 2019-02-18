@@ -19,13 +19,20 @@ class SlideModelGeneric(object):
 
     def _initialize(self):
         cells = []
-        for y in range(self.offset,self.shape[0],self.cell_width):
+        for m,y in enumerate(range(self.offset,self.shape[0],self.cell_width)):
             for x in range(self.offset,self.shape[1],self.cell_width):
-                cells.append([x,y])
+                if m%2==0:
+                    cells.append([x-self.offset,y])
+                else:
+                    cells.append([x,y])
+            if m%2==0:
+                cells.append([self.shape[1]-1,y])
         cells = pd.DataFrame(cells,columns=['x','y']).reset_index().\
             rename(columns={'index':'id'})
-        cells['x'] = cells.apply(lambda x: x['x'] if (x['y']-self.offset)%(self.cell_width*2)==0 else x['x']-self.offset,1)
+#        cells['x'] = cells.apply(lambda x: x['x'] if (x['y']-self.offset)%(self.cell_width*2)==0 else x['x']-self.offset,1)
         cells['phenotype_label'] = 'OTHER'
+        cells = cells.set_index('id').sample(frac=1).reset_index(drop=True)
+        cells['id'] = range(1,cells.shape[0]+1)
         return cells
 
     def expanded_cells(self):

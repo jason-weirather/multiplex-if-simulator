@@ -2,9 +2,56 @@
 
 Simulate multiplex IF data 
 
-### Read the docs:
+##### Read the docs: https://jason-weirather.github.io/multiplex-if-simulator/
 
-https://jason-weirather.github.io/multiplex-if-simulator/
+##### Quickstart
+
+Generate a small Infiltrated mIF image
+
+```python
+from multiplexifsimulator.models.general import SlideModelInfiltrated as SMI
+from multiplexifsimulator.formats.inform import FrameEmitterInForm
+from plotnine import *
+import matplotlib.pyplot as plt
+
+## Set your image size
+shape = (100,150)
+
+## Set the cell coordinates and phenotypes with a model
+model = SMI(shape)
+## Initialize the emitter
+fe = FrameEmitterInForm(shape)
+fe.set_cell_coordinates(model.cells)
+## Generate the base images in numpy array format
+cell_image, edge_image, processed_image = fe.make_cell_image()
+
+## Show the images
+(ggplot(model.cells,aes(x='x',y='y',fill='phenotype_label'))
+ + geom_point(shape='h',size=5,stroke=0.3)
+ + theme_minimal()
+ + theme(figure_size=(4.5,4),aspect_ratio=shape[0]/shape[1])
+ + xlim(0,shape[1])
+ + ylim(0,shape[0])
+).draw()
+plt.show()
+plt.imshow(cell_image,origin='lower')
+plt.show()
+plt.imshow(edge_image,origin='lower')
+plt.show()
+plt.imshow(processed_image,origin='lower')
+plt.show()
+```
+
+![Image of phenotypes](https://multiplexifsimulator.github.com/images/phenotypes.png)
+
+![Image of cell map](https://multiplexifsimulator.github.com/images/cell_map.png)
+
+![Image of edge map](https://multiplexifsimulator.github.com/images/edge_map.png)
+
+![Image of processed area](https://multiplexifsimulator.github.com/images/processed_image.png)
+
+
+```{python}
 
 ### Generate a binary_seg_map.tif based on a cell seg data file
 

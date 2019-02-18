@@ -41,7 +41,7 @@ class FrameEmitter(object):
         if 'x' not in cell_df.columns or 'y' not in cell_df.columns: 
             raise ValueError('x and y must be in dataframe')
         if 'id' in cell_df.columns:
-            self.locations = cell_df.groupby('id').first()[['x','y']].reset_index()
+            self.locations = cell_df.groupby('id').first()[['x','y']]#.reset_index()
             return
         self.locations = cell_df[['x','y']].drop_duplicates().sample(frac=1).reset_index(drop=True)
         self.locations.index = [x+1 for x in self.locations.index]
