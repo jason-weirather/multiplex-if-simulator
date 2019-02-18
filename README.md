@@ -42,16 +42,16 @@ plt.imshow(processed_image,origin='lower')
 plt.show()
 ```
 
-![Image of phenotypes](images/phenotypes.png?raw=true)
+![Image of phenotypes](https://github.com/jason-weirather/multiplex-if-simulator/raw/master/images/phenotypes.png?raw=true)
 
-![Image of cell map](images/cell_map.png?raw=true)
+![Image of cell map](https://github.com/jason-weirather/multiplex-if-simulator/raw/master/images/cell_map.png?raw=true)
 
-![Image of edge map](images/edge_map.png?raw=true)
+![Image of edge map](https://github.com/jason-weirather/multiplex-if-simulator/raw/master/images/edge_map.png?raw=true)
 
-![Image of processed area](images/processed_image.png?raw=true)
+![Image of processed area](https://github.com/jason-weirather/multiplex-if-simulator/raw/master/images/processed_image.png?raw=true)
 
 
-```{python}
+```python
 
 ### Generate a binary_seg_map.tif based on a cell seg data file
 
