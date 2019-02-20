@@ -1,4 +1,4 @@
-from pythologist.formats.utilities import watershed_image, map_image_ids, image_edges
+from pythologistreader.utilities import watershed_image, map_image_ids, image_edges
 import numpy as np
 import pandas as pd
 import sys, random
