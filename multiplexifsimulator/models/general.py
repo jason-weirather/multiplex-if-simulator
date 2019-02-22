@@ -4,7 +4,7 @@ class SlideModelExcluded(SlideModelGeneric):
     A slide where there are more T cells outside of the tumor than inside of the
     tumor and an immunosuppressive phenotypes inside the tumor
 
-    .. figure::  ../images/exclusion.png
+    .. figure::  ./images/exclusion.png
 
     """
     def __init__(self,*args,**kwargs):
@@ -53,7 +53,7 @@ class SlideModelInfiltrated(SlideModelGeneric):
     A slide where there are more T cells outside of the tumor than inside of the
     tumor and an immunosuppressive phenotypes inside the tumor
 
-    .. figure::  ../images/infiltration.png
+    .. figure::  ./images/infiltration.png
 
     """
     def __init__(self,*args,**kwargs):
@@ -101,7 +101,7 @@ class SlideModelUniform(SlideModelGeneric):
     """
     A slide where all cells are uniformally distributed
 
-    .. figure::  ../images/uniform.png
+    .. figure::  ./images/uniform.png
 
     """
     def __init__(self,*args,**kwargs):
