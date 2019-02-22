@@ -1,1 +1,1 @@
-sphinx-build -b builder ./source ./build
+sphinx-build -b builder . ./_build
