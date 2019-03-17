@@ -28,5 +28,6 @@ setup(
                     'scipy',
                     'h5py',
                     'tifffile==0.15.1',
-                    'tables'],
+                    'tables',
+                    'pythologist_image_utilities'],
 )

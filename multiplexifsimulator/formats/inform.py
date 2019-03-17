@@ -41,6 +41,14 @@ class FrameEmitterInForm(FrameEmitter):
             if processed_image:
                 tif.save(self.processed_image.astype(np.uint16), 
                          compress=9, description=_pro_xml)
+    def save_component(self,path,frame_name):
+        """
+        Save a component image
+        """
+        with TiffWriter(path) as tif:
+            for channel in self.components:     
+                tif.save(self.components[channel].astype(np.float16), 
+                     compress=9, extratags=[('ImageDescription','s',0,_get_description(channel,frame_name),True)])
 
     def make_inform_frame(self,model_cells,base_path,sample_name,frame_name,r_format=False):
         """
@@ -111,3 +119,8 @@ def _construct_score(cells):
     score['First Cell Compartment'] = 'Membrane'
     score['Second Cell Compartment'] = 'Nucleus'
     return score
+def _get_description(channel_name,frame_name):
+    istr = '<?xml version="1.0" encoding="utf-16"?>\r\n<PerkinElmer-QPI-ImageDescription>\r\n  <DescriptionVersion>2</DescriptionVersion>\r\n  <AcquisitionSoftware>Mantra</AcquisitionSoftware>\r\n  <ImageType>FullResolution</ImageType>\r\n  <Identifier>d512eea2-f3fd-4ba5-92ed-69b9c9aa9bf2</Identifier>\r\n  <SlideID>'+\
+        frame_name+'</SlideID>\r\n  <Barcode />\r\n  <ComputerName>LAPTOP</ComputerName>\r\n  <IsUnmixedComponent>True</IsUnmixedComponent>\r\n  <ExposureTime>16969</ExposureTime>\r\n  <SignalUnits>33</SignalUnits>\r\n  <Name>'+\
+        channel_name+'</Name>\r\n  <Color>255,255,0</Color>\r\n  <Objective>20x [20x]</Objective>\r\n  <ValidationCode>80D81BB521952BDCC3ECA60A218A344B5FA618CF97F07F9D7E462CFAC6F50BA0</ValidationCode>\r\n</PerkinElmer-QPI-ImageDescription>'
+    return(istr)
