@@ -27,7 +27,7 @@ setup(
                     'numpy',
                     'scipy',
                     'h5py',
-                    'tifffile==0.15.1',
+                    'scikit-image',
                     'tables',
                     'pythologist_image_utilities'],
 )
