@@ -1,5 +1,5 @@
 import pandas as pd
-from random import random
+from random import Random
 class SlideModelGeneric(object):
     """
     A Generic class to spawn cell frames based on different models
@@ -10,7 +10,8 @@ class SlideModelGeneric(object):
         - **offset** (int) distnace to offset from side and every other row
         - **cells** (int) the pandas.DataFrame with cell and phenotype information
     """
-    def __init__(self,shape,cell_width=10):
+    def __init__(self,shape,cell_width=10,random_state=None):
+        self.random_state = Random() if random_state is None else Random(random_state)
         self.shape = shape
         self.cell_width = cell_width
         self.offset=5
@@ -61,7 +62,7 @@ class SlideModelGeneric(object):
         """
         self.cells[column_name] = self.cells.apply(lambda x: 
                 fill_label if condition(x) and \
-                     random() < fill_probability else x[column_name]
+                     self.random_state.random() < fill_probability else x[column_name]
             ,1)
 
 
@@ -81,13 +82,13 @@ class SlideModelGeneric(object):
         self.cells[column_name] = self.cells.apply(lambda x: 
                 fill_label if x[axis] < iwidth*breaks[0] and \
                      condition(x) and \
-                     random() < fill_probability[0] else x[column_name]
+                     self.random_state.random() < fill_probability[0] else x[column_name]
             ,1)
         ## Do the right
         self.cells[column_name] = self.cells.apply(lambda x: 
                 fill_label if x[axis] >= iwidth*breaks[1] and \
                      condition(x) and \
-                     random() < fill_probability[1] else x[column_name]
+                     self.random_state.random() < fill_probability[1] else x[column_name]
             ,1)
 
         ## Now do the gradient
@@ -99,7 +100,7 @@ class SlideModelGeneric(object):
                 fill_label if v[axis] >= iwidth*breaks[0] and \
                      v[axis] < iwidth*breaks[1] and \
                      condition(v) and \
-                     p1+_prob(iwidth,v[axis],breaks)*(p2-p1) < random() else v[column_name]
+                     p1+_prob(iwidth,v[axis],breaks)*(p2-p1) < self.random_state.random() else v[column_name]
             ,1)
 
 

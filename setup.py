@@ -8,7 +8,7 @@ with open(path.join(this_folder,'README.md'),encoding='utf-8') as inf:
 
 setup(
   name='multiplexifsimulator',
-  version='0.1.0',
+  version='0.2.0',
   description='Python interface to simulate outputs of the PerkinElmer inForm software',
   long_description=long_description,
   url='https://github.com/jason-weirather/multiplexifsimulator',

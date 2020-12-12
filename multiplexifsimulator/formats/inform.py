@@ -1,8 +1,10 @@
 from multiplexifsimulator import FrameEmitter
-from tifffile import TiffWriter
+from skimage.external.tifffile import TiffWriter
 import numpy as np
 import pandas as pd
 import os
+
+tif_tag_integer = {'ImageDescription':'270'}
 _nuc_xml = '<?xml version="1.0" encoding="utf-16"?>\r\n<SegmentationImage>\r\n <Version>1</Version>\r\n <CompartmentType>Nucleus</CompartmentType>\r\n</SegmentationImage>'
 _mem_xml = '<?xml version="1.0" encoding="utf-16"?>\r\n<SegmentationImage>\r\n <Version>1</Version>\r\n <CompartmentType>Membrane</CompartmentType>\r\n</SegmentationImage>'
 _pro_xml = '<?xml version="1.0" encoding="utf-16"?>\r\n<ProcessRegionImage>\r\n <Version>1</Version>\r\n</ProcessRegionImage>'
@@ -22,25 +24,13 @@ class FrameEmitterInForm(FrameEmitter):
         Save a binary_seg_map image based on the **.make_cell_image_()** images in a python-readable format
         """
         with TiffWriter(path) as tif:
+            tif.save(self.nucleus_image.astype(np.uint16), 
+                     compress=9, extratags=[(tif_tag_integer['ImageDescription'],'s',0,_nuc_xml,True)])
             tif.save(self.cell_image.astype(np.uint16), 
-                     compress=9, extratags=[('ImageDescription','s',0,_nuc_xml,True)])
-            tif.save(self.edge_image.astype(np.uint16), 
-                     compress=9, extratags=[('ImageDescription','s',0,_mem_xml,True)])
+                     compress=9, extratags=[(tif_tag_integer['ImageDescription'],'s',0,_mem_xml,True)])
             if processed_image:
                 tif.save(self.processed_image.astype(np.uint16), 
-                         compress=9, extratags=[('ImageDescription','s',0,_pro_xml,True)])
-    def save_binary_seg_maps_r(self,path,processed_image=True):
-        """
-        Save a binary_seg_map image based on the **.make_cell_image_()** images in an R-readable format
-        """
-        with TiffWriter(path) as tif:
-            tif.save(self.cell_image.astype(np.uint16), 
-                     compress=9, description=_nuc_xml)
-            tif.save(self.edge_image.astype(np.uint16), 
-                     compress=9, description=_mem_xml)
-            if processed_image:
-                tif.save(self.processed_image.astype(np.uint16), 
-                         compress=9, description=_pro_xml)
+                         compress=9, extratags=[(tif_tag_integer['ImageDescription'],'s',0,_pro_xml,True)])
     def save_component(self,path,frame_name):
         """
         Save a component image
@@ -48,9 +38,9 @@ class FrameEmitterInForm(FrameEmitter):
         with TiffWriter(path) as tif:
             for channel in self.components:     
                 tif.save(self.components[channel].astype(np.float16), 
-                     compress=9, extratags=[('ImageDescription','s',0,_get_description(channel,frame_name),True)])
+                     compress=9, extratags=[(tif_tag_integer['ImageDescription'],'s',0,_get_description(channel,frame_name),True)])
 
-    def make_inform_frame(self,model_cells,base_path,sample_name,frame_name,r_format=False):
+    def make_inform_frame(self,model_cells,base_path,sample_name,frame_name):
         """
         Save the inform 'cell_seg_data.txt', 'score_data.txt' and 'binary_seg_maps.tif' 
         to  **basepath/sample_name/**
@@ -62,16 +52,16 @@ class FrameEmitterInForm(FrameEmitter):
         path = os.path.join(base_path,sample_name)
         if not os.path.exists(path):
             os.makedirs(path)
-        cell_seg.to_csv(os.path.join(path,sample_name+'_'+frame_name+'_cell_seg_data.txt'),
+        cell_seg.to_csv(os.path.join(path,frame_name+'_cell_seg_data.txt'),
             index=False,sep="\t")
-        score.to_csv(os.path.join(path,sample_name+'_'+frame_name+'_score_data.txt'),
+        score.to_csv(os.path.join(path,frame_name+'_score_data.txt'),
             index=False,sep="\t")
         self.make_cell_image()
-        bfile = os.path.join(path,sample_name+'_'+frame_name+'_binary_seg_maps.tif')
-        if r_format:
-            self.save_binary_seg_maps_r(bfile,processed_image=True)
-        else:
-            self.save_binary_seg_maps(bfile,processed_image=True)
+        bfile = os.path.join(path,frame_name+'_binary_seg_maps.tif')
+        self.save_binary_seg_maps(bfile,processed_image=True)
+        cfile = os.path.join(path,frame_name+'_component.tif')
+        fe.make_component_image(nucleus_width=3,membrane_width=6,DAPI=True,verbose=True,ignore_phenotypes=['OTHER'],gaussian_filter_sigma=4)
+        fe.save_component(cfile,frame_name)
         return #path,cell_seg,score
         
 

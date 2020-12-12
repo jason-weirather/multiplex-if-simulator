@@ -1,7 +1,7 @@
 from pythologist_image_utilities import watershed_image, map_image_ids, image_edges
 import numpy as np
 import pandas as pd
-import sys, random
+import sys, math
 from scipy.ndimage.filters import gaussian_filter
 class FrameEmitter(object):
     """
@@ -66,6 +66,7 @@ class FrameEmitter(object):
 
         Sets properties:
             - cell_image (numpy.array)
+            - nucleus_image (numpy.array)
             - edge_image (numpy.array)
             - processed_image (numpy.array)
 
@@ -76,18 +77,39 @@ class FrameEmitter(object):
         """
         # requires 'locations' property set
         nuc = np.zeros(self.shape).astype(np.uint32)
+        # Initialize the image to a pixel at the centroid
         for index,row in self.locations.iterrows():
             nuc[row['y']][row['x']] = row.name
-        start = map_image_ids(nuc,remove_zero=False).query('id!=0').apply(lambda x: (x['x'],x['y']),1)
-        finish = map_image_ids(nuc,remove_zero=False).query('id==0').apply(lambda x: (x['x'],x['y']),1)
-        nuc1 = watershed_image(nuc,list(start),list(finish),steps=self.cell_steps,border=0)
+        nuc1 = nuc.copy()
+        for index,row in self.locations.iterrows():
+            start = [(row['x'],row['y'])]
+            finish = map_image_ids(nuc1,remove_zero=False).query('id==0').apply(lambda x: (x['x'],x['y']),1)
+            if finish.shape[0]==0: finish = []
+            #print(len(list(finish)))
+            nuc1 = watershed_image(nuc1,list(start),list(finish),fill_value=row.name,steps=self.cell_steps,border=0)
+        nuc2 = nuc.copy()
+        for index,row in self.locations.iterrows():
+            start = [(row['x'],row['y'])]
+            finish = map_image_ids(nuc2,remove_zero=False).query('id==0').apply(lambda x: (x['x'],x['y']),1)
+            if finish.shape[0]==0: finish = []
+            #print(len(list(finish)))
+            nuc2 = watershed_image(nuc2,list(start),list(finish),fill_value=row.name,steps=math.ceil(self.cell_steps/3),border=0)
+        
+        #start = map_image_ids(nuc,remove_zero=False).query('id!=0').apply(lambda x: (x['x'],x['y']),1)
+        #finish = map_image_ids(nuc,remove_zero=False).query('id==0').apply(lambda x: (x['x'],x['y']),1)
+        #if start.shape[0]==0: start = []
+        #if finish.shape[0]==0: finish = []
+        #nuc1 = watershed_image(nuc,list(start),list(finish),steps=self.cell_steps,border=0)
+        self.nucleus_image = nuc2
         self.cell_image = nuc1
         self.edge_image = image_edges(nuc1)
         start = map_image_ids(nuc1,remove_zero=False).query('id!=0').apply(lambda x: (x['x'],x['y']),1)
         finish = map_image_ids(nuc1,remove_zero=False).query('id==0').apply(lambda x: (x['x'],x['y']),1)
+        if start.shape[0]==0: start = []
+        if finish.shape[0]==0: finish = []
         temp = watershed_image(nuc1,list(start),list(finish),steps=self.boundary_steps,border=0)
         self.processed_image = temp.astype(np.bool).astype(np.uint8)
-        return self.cell_image, self.edge_image, self.processed_image
+        return #self.cell_image, self.nucleus_image, self.edge_image, self.processed_image
     def make_component_image(self,nucleus_width=5,membrane_width=20,DAPI=True,verbose=True,ignore_phenotypes=['OTHER'],gaussian_filter_sigma=4):
         components = {}
         if DAPI:
