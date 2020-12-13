@@ -17,8 +17,10 @@ class FrameEmitter(object):
         self.shape = kwargs['shape']
         self.cell_steps = kwargs['cell_steps']
         self.boundary_steps = kwargs['boundary_steps']
+        self.export=kwargs['export']
         self.locations = None
-        self.phenotypes = None
+        self.phenotypes1= None
+        self.phenotypes2= None
         return
     def set_cell_coordinates(self,cell_df):
         """
@@ -36,13 +38,22 @@ class FrameEmitter(object):
 
         """
         # set phenotypes if we can
-        if 'phenotype_label' in cell_df:
+        if 'phenotype_label1' in cell_df:
             mc = cell_df.copy()
-            phenotypes = mc['phenotype_label'].dropna().unique()
+            phenotypes = mc['phenotype_label1'].dropna().unique()
             df = pd.DataFrame(index=mc['id'].index,columns=phenotypes).fillna('-')
-            for i,r in mc[['id','phenotype_label']].dropna().iterrows():
-                df.loc[i,r['phenotype_label']] = '+'
-            self.phenotypes = df.merge(mc.drop(columns=['x','y','phenotype_label']),left_index=True,right_on='id').set_index('id')
+            for i,r in mc[['id','phenotype_label1']].dropna().iterrows():
+                df.loc[i,r['phenotype_label1']] = '+'
+            self.phenotypes1 = df.merge(mc.drop(columns=['x','y','phenotype_label1','phenotype_label2']),left_index=True,right_on='id').set_index('id')
+
+        # set phenotypes if we can
+        if 'phenotype_label2' in cell_df:
+            mc = cell_df.copy()
+            phenotypes = mc['phenotype_label2'].dropna().unique()
+            df = pd.DataFrame(index=mc['id'].index,columns=phenotypes).fillna('-')
+            for i,r in mc[['id','phenotype_label2']].dropna().iterrows():
+                df.loc[i,r['phenotype_label2']] = '+'
+            self.phenotypes2 = df.merge(mc.drop(columns=['x','y','phenotype_label1','phenotype_label2']),left_index=True,right_on='id').set_index('id')
 
 
         if cell_df['x'].max() >= self.shape[1]:
@@ -80,36 +91,35 @@ class FrameEmitter(object):
         # Initialize the image to a pixel at the centroid
         for index,row in self.locations.iterrows():
             nuc[row['y']][row['x']] = row.name
-        nuc1 = nuc.copy()
+        nuc1 = nuc.copy() # work on the cell_image
+        nuc2 = nuc.copy() # work on the nucleus_image
         for index,row in self.locations.iterrows():
-            start = [(row['x'],row['y'])]
+            start = [(row['x'],row['y'])] # Shared starting point
+
+            # Fill in the cell_image
             finish = map_image_ids(nuc1,remove_zero=False).query('id==0').apply(lambda x: (x['x'],x['y']),1)
             if finish.shape[0]==0: finish = []
-            #print(len(list(finish)))
             nuc1 = watershed_image(nuc1,list(start),list(finish),fill_value=row.name,steps=self.cell_steps,border=0)
-        nuc2 = nuc.copy()
-        for index,row in self.locations.iterrows():
-            start = [(row['x'],row['y'])]
+
+            # Fill in the nucleus
             finish = map_image_ids(nuc2,remove_zero=False).query('id==0').apply(lambda x: (x['x'],x['y']),1)
             if finish.shape[0]==0: finish = []
-            #print(len(list(finish)))
             nuc2 = watershed_image(nuc2,list(start),list(finish),fill_value=row.name,steps=math.ceil(self.cell_steps/3),border=0)
+
         
-        #start = map_image_ids(nuc,remove_zero=False).query('id!=0').apply(lambda x: (x['x'],x['y']),1)
-        #finish = map_image_ids(nuc,remove_zero=False).query('id==0').apply(lambda x: (x['x'],x['y']),1)
-        #if start.shape[0]==0: start = []
-        #if finish.shape[0]==0: finish = []
-        #nuc1 = watershed_image(nuc,list(start),list(finish),steps=self.cell_steps,border=0)
         self.nucleus_image = nuc2
         self.cell_image = nuc1
         self.edge_image = image_edges(nuc1)
+
+        # Work on the processed image starting from the cell_image
         start = map_image_ids(nuc1,remove_zero=False).query('id!=0').apply(lambda x: (x['x'],x['y']),1)
         finish = map_image_ids(nuc1,remove_zero=False).query('id==0').apply(lambda x: (x['x'],x['y']),1)
         if start.shape[0]==0: start = []
         if finish.shape[0]==0: finish = []
         temp = watershed_image(nuc1,list(start),list(finish),steps=self.boundary_steps,border=0)
         self.processed_image = temp.astype(np.bool).astype(np.uint8)
-        return #self.cell_image, self.nucleus_image, self.edge_image, self.processed_image
+        return
+
     def make_component_image(self,nucleus_width=5,membrane_width=20,DAPI=True,verbose=True,ignore_phenotypes=['OTHER'],gaussian_filter_sigma=4):
         components = {}
         if DAPI:
@@ -117,10 +127,19 @@ class FrameEmitter(object):
             components['DAPI'] = _generate_components(self.shape,self.locations,
                                                       nucleus_width=nucleus_width,
                                                       membrane_width=membrane_width,gaussian_filter_sigma=gaussian_filter_sigma)
-        for phenotype in self.phenotypes.columns:
+        for phenotype in self.phenotypes1.columns:
             if  phenotype in ignore_phenotypes: continue
             if verbose: sys.stderr.write(phenotype+"\n")
-            p = self.phenotypes[self.phenotypes[phenotype]=='+'].\
+            p = self.phenotypes1[self.phenotypes1[phenotype]=='+'].\
+                rename(columns={phenotype:'phenotype'})[['phenotype']]
+            p = p.merge(self.locations,left_index=True,right_index=True).drop(columns='phenotype')
+            components[phenotype] = _generate_components(self.shape,p,
+                                                         nucleus_width=nucleus_width,
+                                                         membrane_width=membrane_width,gaussian_filter_sigma=gaussian_filter_sigma)
+        for phenotype in self.phenotypes2.columns:
+            if  phenotype in ignore_phenotypes: continue
+            if verbose: sys.stderr.write(phenotype+"\n")
+            p = self.phenotypes2[self.phenotypes2[phenotype]=='+'].\
                 rename(columns={phenotype:'phenotype'})[['phenotype']]
             p = p.merge(self.locations,left_index=True,right_index=True).drop(columns='phenotype')
             components[phenotype] = _generate_components(self.shape,p,
@@ -130,6 +149,7 @@ class FrameEmitter(object):
         return components
 
 def celldataframe_to_cell_model(cdf,frame_name=None):
+    raise ValueError("Not currently supported")
     if frame_name is None and len(cdf['frame_name'].unique()) > 1:
         raise ValueError("set no more than one frame at a time")
     cdf = cdf.loc[cdf['frame_name']==frame_name].copy()

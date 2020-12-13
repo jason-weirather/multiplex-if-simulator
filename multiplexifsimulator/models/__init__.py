@@ -11,6 +11,7 @@ class SlideModelGeneric(object):
         - **cells** (int) the pandas.DataFrame with cell and phenotype information
     """
     def __init__(self,shape,cell_width=10,random_state=None):
+        self.random_seed = random_state
         self.random_state = Random() if random_state is None else Random(random_state)
         self.shape = shape
         self.cell_width = cell_width
@@ -31,8 +32,9 @@ class SlideModelGeneric(object):
         cells = pd.DataFrame(cells,columns=['x','y']).reset_index().\
             rename(columns={'index':'id'})
 #        cells['x'] = cells.apply(lambda x: x['x'] if (x['y']-self.offset)%(self.cell_width*2)==0 else x['x']-self.offset,1)
-        cells['phenotype_label'] = 'OTHER'
-        cells = cells.set_index('id').sample(frac=1).reset_index(drop=True)
+        cells['phenotype_label1'] = 'OTHER'
+        cells['phenotype_label2'] = 'OTHER'
+        cells = cells.set_index('id').sample(frac=1,random_state=self.random_seed).reset_index(drop=True)
         cells['id'] = range(1,cells.shape[0]+1)
         return cells
 
@@ -41,19 +43,20 @@ class SlideModelGeneric(object):
         Returns:
             pandas.DataFrame with all phenotypes expanded in the phenotype_label
         """
+        raise ValueError("Not currently supported.")
         ec = self.cells.copy()
-        scored = [x for x in self.cells.columns if x not in ['id','x','y','phenotype_label']]
+        scored = [x for x in self.cells.columns if x not in ['id','x','y','phenotype_label1','phenotype_label2']]
         #print(scored)
         for name in scored:
-            ec['phenotype_label'] = ec.apply(lambda x:
-                x['phenotype_label']+' '+name+x[name]
+            ec['phenotype_label1'] = ec.apply(lambda x:
+                x['phenotype_label1']+' '+name+x[name]
             ,1)
         ec = ec.drop(columns=scored)
         return ec
 
 
     def fill_uniform(self,
-        column_name = 'phenotype_label',
+        column_name = 'phenotype_label1',
         fill_label='TUMOR',
         fill_probability=0.5,
         condition=lambda x: 1==1):
@@ -67,7 +70,7 @@ class SlideModelGeneric(object):
 
 
     def fill_gradient_margin(self,
-                        column_name = 'phenotype_label',
+                        column_name = 'phenotype_label1',
                         fill_label='TUMOR',
                         axis='x',
                         breaks=[1/2,3/4],
