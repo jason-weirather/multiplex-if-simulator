@@ -3,14 +3,14 @@ from skimage.external.tifffile import TiffWriter
 import numpy as np
 import pandas as pd
 import os
-_long_names = {
-    'TUMOR':'CYTOK (Opal 520)',
-    'T-CELL':'CD3 (Opal 540)',
-    'PDL1':'PDL1 (Opal 570)',
-    'PD1':'PD1 (Opal 620)',
-    'MACROPHAGE':'CD68 (Opal 650)',
-    'FOXP3':'FOXP3 (Opal 690)'
-}
+#_long_names = {
+#    'TUMOR':'CYTOK (Opal 520)',
+#    'T-CELL':'CD3 (Opal 540)',
+#    'PDL1':'PDL1 (Opal 570)',
+#    'PD1':'PD1 (Opal 620)',
+#    'MACROPHAGE':'CD68 (Opal 650)',
+#    'FOXP3':'FOXP3 (Opal 690)'
+#}
 tif_tag_integer = {'ImageDescription':'270'}
 _nuc_xml = '<?xml version="1.0" encoding="utf-16"?>\r\n<SegmentationImage>\r\n <Version>1</Version>\r\n <CompartmentType>Nucleus</CompartmentType>\r\n</SegmentationImage>'
 _mem_xml = '<?xml version="1.0" encoding="utf-16"?>\r\n<SegmentationImage>\r\n <Version>1</Version>\r\n <CompartmentType>Membrane</CompartmentType>\r\n</SegmentationImage>'
@@ -24,8 +24,8 @@ class FrameEmitterInForm(FrameEmitter):
     def __init__(self,shape=(1040,1392),
                       cell_steps=17,
                       boundary_steps=10,
-                      export=1):
-        super(FrameEmitterInForm, self).__init__(shape=shape,cell_steps=cell_steps,boundary_steps=boundary_steps,export=export)
+                      ):
+        super(FrameEmitterInForm, self).__init__(shape=shape,cell_steps=cell_steps,boundary_steps=boundary_steps)
         return        
     def save_custom_mask(self,path,x_intercept_fraction=0.667):
       """
@@ -79,10 +79,17 @@ class FrameEmitterInForm(FrameEmitter):
                      compress=9, extratags=[(tif_tag_integer['ImageDescription'],
                                              's',
                                              0,
-                                             _get_description(channel if channel not in _long_names else _long_names[channel],frame_name),
+                                             _get_description(channel,frame_name),
                                              True)])
 
-    def make_inform_frame(self,model_cells,image_folder,frame_name,annotations=None,gimp_tsi=('Tumor','Invasive_Margin'),custom_label=None):
+    def make_inform_frame(self,
+                          image_folder,
+                          frame_name,
+                          annotations=None,
+                          gimp_tsi=('Tumor','Invasive_Margin'),
+                          custom_label=None,
+                          binary_names=['PDL1','PD1'],
+                          phenotype_strategy=1):
         """
         Save the inform 'cell_seg_data.txt', 'score_data.txt' and 'binary_seg_maps.tif' 
         to  **<image_folder>/**
@@ -91,9 +98,10 @@ class FrameEmitterInForm(FrameEmitter):
         gimp_tsi is which images to output.  can be either Tumor or Tumor and Invsive_Margin
         custom_label can be anything
         """
-        self.set_cell_coordinates(model_cells)
-        cell_seg = _construct_cell_seg(model_cells,self.export)
-        score = _construct_score(model_cells,self.export,annotations)
+        if self.cell_model is None:
+          raise ValueError("Need to set the model cells to make calls")
+        cell_seg = _construct_cell_seg(self.cell_model,phenotype_strategy)
+        score = _construct_score(self.cell_model,binary_names,annotations)
         score.loc[:,'Sample Name'] = frame_name
         if not os.path.exists(image_folder):
             os.makedirs(image_folder)
@@ -104,8 +112,12 @@ class FrameEmitterInForm(FrameEmitter):
         self.make_cell_image()
         bfile = os.path.join(image_folder,frame_name+'_binary_seg_maps.tif')
         self.save_binary_seg_maps(bfile,processed_image=True,regions=True if annotations=='InForm' else False)
-        cfile = os.path.join(image_folder,frame_name+'_component.tif')
-        self.make_component_image(nucleus_width=3,membrane_width=6,DAPI=True,verbose=True,ignore_phenotypes=['OTHER'],gaussian_filter_sigma=4)
+        cfile = os.path.join(image_folder,frame_name+'_component_data.tif')
+        self.make_component_image(nucleus_width=3,
+                                  membrane_width=6,
+                                  DAPI=True,
+                                  verbose=True,
+                                  gaussian_filter_sigma=4,)
         self.save_component(cfile,frame_name)
         if annotations is not None:
           if annotations == 'GIMP TSI':
@@ -125,7 +137,7 @@ class FrameEmitterInForm(FrameEmitter):
         return #path,cell_seg,score
         
 
-def _construct_cell_seg(cells,export):
+def _construct_cell_seg(cell_model,phenotype_strategy):
     def _fill_chunk(name):
       return [
           'Entire Cell '+name+' Mean (Normalized Counts, Total Weighting)',
@@ -133,7 +145,14 @@ def _construct_cell_seg(cells,export):
           'Membrane '+name+' Mean (Normalized Counts, Total Weighting)',
       ]
     fill = []
-    for x in _long_names: fill+=_fill_chunk(_long_names[x])
+    headings_by_marker1 = {}
+    for binary_name in cell_model.binary_names_to_channels.keys(): 
+      headings_by_marker1[binary_name] = _fill_chunk(cell_model.binary_names_to_channels[binary_name])
+      fill+=_fill_chunk(binary_name)
+    headings_by_marker2 = {}
+    for phenotype_name in cell_model.phenotypes_to_channels.keys():
+      headings_by_marker2[phenotype_name] = _fill_chunk(cell_model.phenotypes_to_channels[phenotype_name])
+      fill+=_fill_chunk(cell_model.phenotypes_to_channels[phenotype_name])
 
     header = ['Cell ID','Cell X Position','Cell Y Position','Nucleus Area (pixels)',
           'Nucleus Area (percent)','Nucleus Compactness','Nucleus Minor Axis',
@@ -143,31 +162,45 @@ def _construct_cell_seg(cells,export):
           'Entire Cell Area (pixels)',
           'Entire Cell Area (percent)','Entire Cell Compactness',
           'Entire Cell Minor Axis','Entire Cell Major Axis','Phenotype','Confidence']
-    cs = cells.copy().rename(columns={'id':'Cell ID',
+    cs = cell_model.cells.copy().rename(columns={'id':'Cell ID',
                                   'x':'Cell X Position',
                                   'y':'Cell Y Position'})
-    if export==1:
+
+    fill_in = [x for x in header if x not in cs.columns]
+    for col in fill_in: cs[col] = 1
+    for marker in headings_by_marker1:
+      for column_name in headings_by_marker1[marker]:
+          cs.loc[cs[marker]=='-',column_name] = 0
+    for phenotype_name in cell_model.phenotypes_to_channels.keys():
+      for column_name in headings_by_marker2[phenotype_name]:
+        if phenotype_name in cs['phenotype_label1']:
+          cs.loc[cs['phenotypes_label1']==phenotype_name,headings_by_marker2[phenotype_name]] = 0
+        if phenotype_name in cs['phenotype_label2']:
+          cs.loc[cs['phenotypes_label2']==phenotype_name,headings_by_marker2[phenotype_name]] = 0
+    if phenotype_strategy==1:
       cs = cs.rename(columns={'phenotype_label1':'Phenotype'}).drop(columns=['phenotype_label2'])
     else:
       cs = cs.rename(columns={'phenotype_label2':'Phenotype'}).drop(columns=['phenotype_label1'])
 
-    fill_in = [x for x in header if x not in cs.columns]
-    for col in fill_in: cs[col] = 1
-    cs.loc[cs[_long_names['PD1']]=='-',cs.columns.str.contains('PD1')] = 0
-    cs.loc[cs[_long_names['PDL1']]=='-',cs.columns.str.contains('PDL1')] = 0
-    output = cs.drop(columns=[_long_names['PD1'],_long_names['PDL1'],_long_names['FOXP3']])
+    output = cs.drop(columns=list(cell_model.binary_names_to_channels.keys()))
     return output
 
-def _construct_score(cells,export,annotations):
-  if export ==1:
+def _construct_score(cell_model,binary_names,annotations):
+  if len(binary_names) == 0: return None
+  if len(binary_names) > 2: 
+    raise ValueError("Inform exports dont support more than 2 channels for thresholding to binary phenotypes")
+  if len(binary_names) ==2:
     header = ['Path','Sample Name','Tissue Category',
           'First Cell Compartment','First Stain Component',
           'Second Cell Compartment','Second Stain Component',
-          'Double Negative','Single '+_long_names['PDL1'],
-          'Single '+_long_names['PD1'],'Double Positive',
-          'Tissue Category Area (Percent)','Number of Cells',
-          _long_names['PDL1']+' Threshold',
-          _long_names['PD1']+' Threshold','Lab ID','Slide ID',
+          'Double Negative',
+          'Single '+cell_model.binary_names_to_channels[binary_names[0]],
+          'Single '+cell_model.binary_names_to_channels[binary_names[1]],
+          'Double Positive',
+          'Tissue Category Area (Percent)',
+          'Number of Cells',
+          cell_model.binary_names_to_channels[binary_names[0]]+' Threshold',
+          cell_model.binary_names_to_channels[binary_names[1]]+' Threshold','Lab ID','Slide ID',
           'TMA Sector','TMA Row','TMA Column','TMA Field',
           'inForm 2.1.5430.24864']
     if annotations=='InForm':
@@ -177,15 +210,15 @@ def _construct_score(cells,export,annotations):
     score['Path'] = '/location'
     score['Sample Name'] = 'sample_name'
     score['Tissue Category'] = ''
-    score['First Stain Component'] = _long_names['PDL1']
-    score['Second Stain Component'] = _long_names['PD1']
+    score['First Stain Component'] = cell_model.binary_names_to_channels[binary_names[0]]
+    score['Second Stain Component'] = cell_model.binary_names_to_channels[binary_names[1]]
     score['First Cell Compartment'] = 'Membrane'
     score['Second Cell Compartment'] = 'Nucleus'
     if annotations=='InForm':
       score.iloc[0,2] = 'Tumor'
-      score.iloc[0,2] = 'Stroma'
+      score.iloc[1,2] = 'Stroma'
     return score
-  if export == 2: # The single channel case
+  if len(binary_names) == 1: # The single channel case
     header = [
       'Path'
       'Sample Name',
@@ -212,11 +245,11 @@ def _construct_score(cells,export,annotations):
     score['Path'] = '/location'
     score['Sample Name'] = 'sample_name'
     score['Tissue Category'] = ''
-    score['Stain Component'] = _long_names['FOXP3']
+    score['Stain Component'] = cell_model.binary_names_to_channels[binary_names[1]]
     score['Cell Compartment'] = 'Nucleus'
     if annotations=='InForm':
       score.iloc[0,2] = 'Tumor'
-      score.iloc[0,2] = 'Stroma'
+      score.iloc[1,2] = 'Stroma'
     return score
 def _get_description(channel_name,frame_name):
     istr = '<?xml version="1.0" encoding="utf-16"?>\r\n<PerkinElmer-QPI-ImageDescription>\r\n  <DescriptionVersion>2</DescriptionVersion>\r\n  <AcquisitionSoftware>Mantra</AcquisitionSoftware>\r\n  <ImageType>FullResolution</ImageType>\r\n  <Identifier>d512eea2-f3fd-4ba5-92ed-69b9c9aa9bf2</Identifier>\r\n  <SlideID>'+\

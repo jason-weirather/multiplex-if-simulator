@@ -17,6 +17,8 @@ class SlideModelGeneric(object):
         self.cell_width = cell_width
         self.offset=5
         self.cells = self._initialize()
+        self.phenotypes_to_channels = {}
+        self.binary_names_to_channels = {}
         return
 
     def _initialize(self):
