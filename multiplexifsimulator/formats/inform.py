@@ -69,6 +69,9 @@ class FrameEmitterInForm(FrameEmitter):
             if processed_image:
                 tif.save(self.processed_image.astype(np.uint32), 
                          compress=9, extratags=[(tif_tag_integer['ImageDescription'],'s',0,_pro_xml,True)])
+        if regions:
+          return {1:'Tumor',2:'Stroma'}, region_image.astype(np.uint32)
+        return None, None
     def save_component(self,path,frame_name):
         """
         Save a component image
@@ -85,22 +88,29 @@ class FrameEmitterInForm(FrameEmitter):
     def make_inform_frame(self,
                           image_folder,
                           frame_name,
-                          annotations=None,
+                          annotations='NO_ANNOTATION',
                           gimp_tsi=('Tumor','Invasive_Margin'),
                           custom_label=None,
                           binary_names=['PDL1','PD1'],
-                          phenotype_strategy=1):
+                          phenotype_strategy=1,
+                          annotation_folder=None):
         """
         Save the inform 'cell_seg_data.txt', 'score_data.txt' and 'binary_seg_maps.tif' 
         to  **<image_folder>/**
 
-        annotations can be either 'GIMP TSI', or 'GIMP CUSTOM' or 'InForm'
+        annotations can be either 'GIMP_TSI', or 'GIMP_CUSTOM' or 'INFORM_ANALYSIS'
         gimp_tsi is which images to output.  can be either Tumor or Tumor and Invsive_Margin
         custom_label can be anything
         """
+        if annotation_folder is None:
+          annotation_folder = image_folder
         if self.cell_model is None:
           raise ValueError("Need to set the model cells to make calls")
-        cell_seg = _construct_cell_seg(self.cell_model,phenotype_strategy)
+        # Make binary seg map first in case we need its regions
+        self.make_cell_image()
+        bfile = os.path.join(image_folder,frame_name+'_binary_seg_maps.tif')
+        region_key, region_image = self.save_binary_seg_maps(bfile,processed_image=True,regions=True if annotations=='INFORM_ANALYSIS' else False)
+        cell_seg = _construct_cell_seg(self.cell_model,phenotype_strategy,region_key,region_image)
         score = _construct_score(self.cell_model,binary_names,annotations)
         score.loc[:,'Sample Name'] = frame_name
         if not os.path.exists(image_folder):
@@ -109,9 +119,6 @@ class FrameEmitterInForm(FrameEmitter):
             index=False,sep="\t")
         score.to_csv(os.path.join(image_folder,frame_name+'_score_data.txt'),
             index=False,sep="\t")
-        self.make_cell_image()
-        bfile = os.path.join(image_folder,frame_name+'_binary_seg_maps.tif')
-        self.save_binary_seg_maps(bfile,processed_image=True,regions=True if annotations=='InForm' else False)
         cfile = os.path.join(image_folder,frame_name+'_component_data.tif')
         self.make_component_image(nucleus_width=3,
                                   membrane_width=6,
@@ -120,24 +127,24 @@ class FrameEmitterInForm(FrameEmitter):
                                   gaussian_filter_sigma=4,)
         self.save_component(cfile,frame_name)
         if annotations is not None:
-          if annotations == 'GIMP TSI':
+          if annotations == 'GIMP_TSI':
             if 'Tumor' not in gimp_tsi:
                raise ValueError("need a Tumor mask with this annotation strategy")
-            self.save_custom_mask(os.path.join(image_folder,frame_name+'_Tumor.tif'))
+            self.save_custom_mask(os.path.join(annotation_folder,frame_name+'_Tumor.tif'))
             if 'Invasive_Margin' in gimp_tsi:
-              self.save_invasive_margin_mask(os.path.join(image_folder,frame_name+'_Invasive_Margin.tif'))
-          elif annotations == 'GIMP CUSTOM':
+              self.save_invasive_margin_mask(os.path.join(annotation_folder,frame_name+'_Invasive_Margin.tif'))
+          elif annotations == 'GIMP_CUSTOM':
             if custom_label is None:
               raise ValueError("need a custom label if we are setting a custom mask")
-            self.save_custom_mask(os.path.join(image_fold,frame_name+'_'+str(custom_label)+'.tif'))
-          elif annotations == 'InForm':
+            self.save_custom_mask(os.path.join(annotation_folder,frame_name+'_'+str(custom_label)+'.tif'))
+          elif annotations == 'INFORM_ANALYSIS':
             1==1 # we are good.  This case is taken care of in binary seg map creation
-          elif annotations != 'None':
+          elif annotations != 'NO_ANNOTATION':
             raise ValueError("unknown annotation strategy")
         return #path,cell_seg,score
         
 
-def _construct_cell_seg(cell_model,phenotype_strategy):
+def _construct_cell_seg(cell_model,phenotype_strategy,region_key,region_image):
     def _fill_chunk(name):
       return [
           'Entire Cell '+name+' Mean (Normalized Counts, Total Weighting)',
@@ -148,13 +155,15 @@ def _construct_cell_seg(cell_model,phenotype_strategy):
     headings_by_marker1 = {}
     for binary_name in cell_model.binary_names_to_channels.keys(): 
       headings_by_marker1[binary_name] = _fill_chunk(cell_model.binary_names_to_channels[binary_name])
-      fill+=_fill_chunk(binary_name)
+      fill+=_fill_chunk(cell_model.binary_names_to_channels[binary_name])
     headings_by_marker2 = {}
     for phenotype_name in cell_model.phenotypes_to_channels.keys():
       headings_by_marker2[phenotype_name] = _fill_chunk(cell_model.phenotypes_to_channels[phenotype_name])
       fill+=_fill_chunk(cell_model.phenotypes_to_channels[phenotype_name])
 
-    header = ['Cell ID','Cell X Position','Cell Y Position','Nucleus Area (pixels)',
+    header = ['Cell ID','Cell X Position','Cell Y Position'] + \
+          [] if region_key is None else ['Tissue Category'] + \
+          ['Nucleus Area (pixels)',
           'Nucleus Area (percent)','Nucleus Compactness','Nucleus Minor Axis',
           'Nucleus Major Axis']+fill+[
           'Membrane Area (pixels)','Membrane Area (percent)','Membrane Compactness',
@@ -183,6 +192,14 @@ def _construct_cell_seg(cell_model,phenotype_strategy):
       cs = cs.rename(columns={'phenotype_label2':'Phenotype'}).drop(columns=['phenotype_label1'])
 
     output = cs.drop(columns=list(cell_model.binary_names_to_channels.keys()))
+    # fill in Tissue category if its there
+    if region_key is not None:
+      # switch to a keyed output
+      _ko = output.copy().set_index('Cell ID')
+      for cell_index in _ko.index:
+        entry = _ko.loc[cell_index]
+        _ko.loc[cell_index,'Tissue Category'] = region_key[region_image[entry['Cell Y Position'],entry['Cell X Position']]]
+      output = _ko.reset_index()
     return output
 
 def _construct_score(cell_model,binary_names,annotations):
@@ -203,7 +220,7 @@ def _construct_score(cell_model,binary_names,annotations):
           cell_model.binary_names_to_channels[binary_names[1]]+' Threshold','Lab ID','Slide ID',
           'TMA Sector','TMA Row','TMA Column','TMA Field',
           'inForm 2.1.5430.24864']
-    if annotations=='InForm':
+    if annotations=='INFORM_ANALYSIS':
       score = pd.DataFrame([len(header)*[0.5],len(header)*[0.5]],columns=header)
     else:
       score = pd.DataFrame([len(header)*[0.5]],columns=header)
@@ -214,7 +231,7 @@ def _construct_score(cell_model,binary_names,annotations):
     score['Second Stain Component'] = cell_model.binary_names_to_channels[binary_names[1]]
     score['First Cell Compartment'] = 'Membrane'
     score['Second Cell Compartment'] = 'Nucleus'
-    if annotations=='InForm':
+    if annotations=='INFORM_ANALYSIS':
       score.iloc[0,2] = 'Tumor'
       score.iloc[1,2] = 'Stroma'
     return score
@@ -238,16 +255,16 @@ def _construct_score(cell_model,binary_names,annotations):
       'TMA Field',
       'inForm 2.4.6921.16061'
     ]
-    if annotations=='InForm':
+    if annotations=='INFORM_ANALYSIS':
       score = pd.DataFrame([len(header)*[0.5],len(header)*[0.5]],columns=header)
     else:
       score = pd.DataFrame([len(header)*[0.5]],columns=header)
     score['Path'] = '/location'
     score['Sample Name'] = 'sample_name'
     score['Tissue Category'] = ''
-    score['Stain Component'] = cell_model.binary_names_to_channels[binary_names[1]]
+    score['Stain Component'] = cell_model.binary_names_to_channels[binary_names[0]]
     score['Cell Compartment'] = 'Nucleus'
-    if annotations=='InForm':
+    if annotations=='INFORM_ANALYSIS':
       score.iloc[0,2] = 'Tumor'
       score.iloc[1,2] = 'Stroma'
     return score
