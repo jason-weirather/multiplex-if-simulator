@@ -162,7 +162,7 @@ def _construct_cell_seg(cell_model,phenotype_strategy,region_key,region_image):
       fill+=_fill_chunk(cell_model.phenotypes_to_channels[phenotype_name])
 
     header = ['Cell ID','Cell X Position','Cell Y Position'] + \
-          [] if region_key is None else ['Tissue Category'] + \
+             list([] if region_key is None else ['Tissue Category']) + \
           ['Nucleus Area (pixels)',
           'Nucleus Area (percent)','Nucleus Compactness','Nucleus Minor Axis',
           'Nucleus Major Axis']+fill+[
@@ -171,19 +171,20 @@ def _construct_cell_seg(cell_model,phenotype_strategy,region_key,region_image):
           'Entire Cell Area (pixels)',
           'Entire Cell Area (percent)','Entire Cell Compactness',
           'Entire Cell Minor Axis','Entire Cell Major Axis','Phenotype','Confidence']
-    cs = cell_model.cells.copy().rename(columns={'id':'Cell ID',
+    cs = cell_model.cells.copy().reset_index().rename(columns={'id':'Cell ID',
                                   'x':'Cell X Position',
                                   'y':'Cell Y Position'})
-
     fill_in = [x for x in header if x not in cs.columns]
-    for col in fill_in: cs[col] = 1
+    for col in fill_in: 
+      cs[col] = 1
     for marker in headings_by_marker1:
       for column_name in headings_by_marker1[marker]:
           cs.loc[cs[marker]=='-',column_name] = 0
+          cs.loc[cs[marker]=='+',column_name] = 1
     for phenotype_name in cell_model.phenotypes_to_channels.keys():
-      for column_name in headings_by_marker2[phenotype_name]:
+      for column_name in headings_by_marker2[phenotype_name]+headings_by_marker2[phenotype_name]:
         if phenotype_name in cs['phenotype_label1']:
-          cs.loc[cs['phenotypes_label1']==phenotype_name,headings_by_marker2[phenotype_name]] = 0
+          cs.loc[cs['phenotypes_label1']==phenotype_name,headings_by_marker1[phenotype_name]] = 0
         if phenotype_name in cs['phenotype_label2']:
           cs.loc[cs['phenotypes_label2']==phenotype_name,headings_by_marker2[phenotype_name]] = 0
     if phenotype_strategy==1:

@@ -52,7 +52,8 @@ class FrameEmitter(object):
         nuc = np.zeros(self.shape).astype(np.uint32)
         # Initialize the image to a pixel at the centroid
         for index,row in self.cell_model.cells.iterrows():
-            nuc[row['y']][row['x']] = row.name
+            #print((index,list(row.index)))
+            nuc[row['y']][row['x']] = index
         nuc1 = nuc.copy() # work on the cell_image
         nuc2 = nuc.copy() # work on the nucleus_image
         sys.stderr.write("Making cell image\n")
@@ -61,7 +62,7 @@ class FrameEmitter(object):
         finish = map_image_ids(nuc1,remove_zero=False).query('id==0').apply(lambda x: (x['x'],x['y']),1)
         if finish.shape[0]==0: finish = []
         for index,row in self.cell_model.cells.iterrows():
-            sys.stderr.write("Making cell "+str(index+1)+" of "+str(_total_count)+"         \r")
+            sys.stderr.write("Making cell "+str(index)+" of "+str(_total_count)+"         \r")
             start = [(row['x'],row['y'])] # Shared starting point
 
             # Fill in the cell_image

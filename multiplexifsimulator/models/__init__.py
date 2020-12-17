@@ -38,7 +38,7 @@ class SlideModelGeneric(object):
         cells['phenotype_label2'] = 'OTHER'
         cells = cells.set_index('id').sample(frac=1,random_state=self.random_seed).reset_index(drop=True)
         cells['id'] = range(1,cells.shape[0]+1)
-        return cells
+        return cells.set_index('id')
 
     def expanded_cells(self):
         """
